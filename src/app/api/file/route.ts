@@ -5,12 +5,21 @@ import { v4 as uuid } from "uuid";
 export async function POST(
     req: Request
 ) {
-    const searchParams = new URL(req.url).searchParams;
-    const folder = searchParams.get("path") || "avatar";
-    const file = (await req.formData()).get('file')!;
+    const formdata = await req.formData();
+    const folder = formdata.get("path") || "avatar";
+    const filename = formdata.get("filename") || ".png";
+    const type = formdata.get("type") || "image/png";
+    const file = formdata.get('file')!;
     
     const supabase = await createClient();
-    const {data: onlineFile, error} = await supabase.storage.from("sol-token-mint").upload(`${folder}/${uuid()}`, file)
+    const {data: onlineFile, error} = await supabase.storage
+        .from("sol-token-mint")
+        .upload(`${folder}/${uuid()}${filename}`, file, {
+            contentType: type as string,
+            headers: {
+                "Content-Disposition": "inline"
+            }
+        })
     console.log("data", onlineFile, error);
     const { data: url } = supabase.storage.from("sol-token-mint").getPublicUrl(`${onlineFile?.path}`);
     return new Response(JSON.stringify({

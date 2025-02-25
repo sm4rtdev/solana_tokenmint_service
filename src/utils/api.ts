@@ -27,15 +27,18 @@ export const changePassword = async (email: string, password: string, oldPasswor
     return res.data.ok;
 }
 
-export const uploadFile = async (file: File, folder: string = "avatar"): Promise<string> => {
+export const uploadFile = async (file: File, filename: string, type: string = "image/png", folder: string = "avatar"): Promise<string> => {
     const formData = new FormData();
+    formData.append("filename", filename);
+    formData.append("type", type);
+    formData.append("path", folder);
     formData.append("file", file);
-    const res = await axios.post(`/api/file?folder=${folder}`, formData, {
+    const res = await axios.post(`/api/file`, formData, {
         headers: {
             "Content-Type": "multipart/form-data"
         }
     })
-    return res.data.publicUrl;
+    return res.data.url;
 }
 
 export const removeFile = async (link: string): Promise<boolean> => {
