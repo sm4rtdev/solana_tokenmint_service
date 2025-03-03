@@ -30,6 +30,38 @@ export async function POST(
     const register = url.searchParams.get("register");
     const reset = url.searchParams.get("reset");
     const supabase = await createClient();
+    const isToken = url.searchParams.get("token");
+    if (isToken != null) {
+      const token = await req.headers.get("Authorization");
+      if (token) {
+
+        const payload = jwt.verify(token, SECRET_KEY) as { email: string, password: string };
+
+        if (!payload) {
+          return new Response(JSON.stringify({
+            message: "invalid token",
+            ok: false
+          }))
+        }
+        else {
+          const { data: user } = await supabase.from("users").select().eq("email", payload.email).single();
+          const check = compareSync(payload.password, user?.password);
+          if (check) {
+            const token = jwt.sign({ email: payload.email, password: payload.password }, SECRET_KEY, { expiresIn: '1d' });
+            return new Response(JSON.stringify({
+              message: "token verified",
+              token: token,
+              ok: true
+            }));
+          } else {
+            return new Response(JSON.stringify({
+              message: "wrong credentials",
+              ok: false
+            }))
+          }
+        }
+      }
+    }
     const { name, email, avatar, password, oldPassword } = await req.json();
     if (login != null) {
       const { data: user } = await supabase.from("users").select().eq("email", email).single();

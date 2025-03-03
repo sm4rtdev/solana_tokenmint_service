@@ -1,7 +1,7 @@
 import axios from "axios"
 
 export const register = async (name:string, email:string, password:string, avatar:string): Promise<boolean> => {
-    const res = await axios.post(`/api/users?register`, {
+    const res = await axios.post(`/api/auth/register`, {
         name,
         email,
         password,
@@ -11,7 +11,7 @@ export const register = async (name:string, email:string, password:string, avata
 }
 
 export const login = async (email: string, password: string): Promise<boolean> => {
-    const res = await axios.post(`/api/users?login`, {
+    const res = await axios.post(`/api/auth/login`, {
         email,
         password
     })
@@ -19,7 +19,7 @@ export const login = async (email: string, password: string): Promise<boolean> =
 }
 
 export const changePassword = async (email: string, password: string, oldPassword: string): Promise<boolean> => {
-    const res = await axios.post(`/api/users?reset`, {
+    const res = await axios.post(`/api/auth/reset`, {
         email,
         password,
         oldPassword

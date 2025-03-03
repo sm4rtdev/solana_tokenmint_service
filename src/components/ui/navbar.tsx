@@ -15,7 +15,7 @@ const Navbar = () => {
             return;
         }
         else {
-            const reponse = await fetch('/api/users?token'
+            const reponse = await fetch('/api/auth/change-password'
                 , {
                     method: 'POST',
                     headers: {
