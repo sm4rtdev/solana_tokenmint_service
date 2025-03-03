@@ -1,25 +1,24 @@
-import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { compareSync, hashSync } from "bcryptjs";
+import { compareSync } from "bcryptjs";
+import { generate_token } from "../validate-token/route";
 
 export async function POST(req: NextRequest) {
     try {
         const supabase = await createClient();
-        const SECRET_KEY = "navy-secret";
         const { email, password } = await req.json();
         const { data: user } = await supabase.from("users").select().eq("email", email).single();
         if (!user) {
             return new NextResponse(JSON.stringify({
-                message: "User not found. Please sign in and try again",
+                message: "user not found",
                 ok: false
             }));
         }
         const check = compareSync(password, user?.password);
         if (check) {
-            const token = jwt.sign({ email: email, password: password }, SECRET_KEY, { expiresIn: '1d' });
+            const token = generate_token(email, user.name, user.avatar);
             return new NextResponse(JSON.stringify({
-                message: "You have successfully signed in.",
+                message: "login success",
                 token: token,
                 ok: true
             }));

@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { hashSync, compareSync } from "bcryptjs";
+import { generate_token, validate_token } from "../validate-token/route";
 
 export async function POST(req: NextRequest) {
     try {
-        const { email, password, oldPassword } = await req.json();
+        const token = req.headers.get('Authorization');
+        if (!token || !token.startsWith("Bearer ")) {
+            return new NextResponse(JSON.stringify({
+                message: "wrong credentials",
+                ok: false
+            }))
+        }
+        const { email, name, avatar, ok, message } = validate_token(token.substring(7));
+        if (!ok) {
+            return new NextResponse(JSON.stringify({
+                message,
+                ok: false
+            }))
+        }
+        const { password, oldPassword } = await req.json();
         const supabase = await createClient();
         const { data: user } = await supabase.from("users").select().eq("email", email).single();
         const check = compareSync(oldPassword, user?.password)
@@ -13,6 +28,7 @@ export async function POST(req: NextRequest) {
             const { error } = await supabase.from("users").update({ password: hash }).eq("email", email);
             return new NextResponse(JSON.stringify({
                 message: error?.message || "update success",
+                token: !error ? generate_token(email!, name!, avatar!) : undefined,
                 ok: !error
             }))
         } else {
