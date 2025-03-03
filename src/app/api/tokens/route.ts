@@ -26,5 +26,8 @@ export async function POST(
   const {error} = await supabase.from("tokens").insert({
     ...token
   })
-  return new Response(error?.message || "saved")
+  return new Response(JSON.stringify({
+    ok: !error,
+    message: error?.message
+  }))
 }
