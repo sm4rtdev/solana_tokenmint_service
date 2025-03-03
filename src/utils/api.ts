@@ -50,3 +50,18 @@ export const getTokenList = async (page: number = 1, size: number = 10, email?: 
     const res = await axios.get(`/api/tokens?page=${page}&size=${size}${email?"&user=" + email:""}`)
     return res.data;
 }
+
+export const saveToken = async (address: string, name: string, symbol: string, description: string, url: string, supply: number, decimals: number, secret?: string) : Promise<boolean> => {
+    const res = await axios.post(`/api/tokens`, {
+        address,
+        name,
+        symbol,
+        description,
+        url,
+        supply,
+        decimals,
+        secret,
+        user: "shiroennosuke@gmail.com"
+    });
+    return res.data.ok;
+}

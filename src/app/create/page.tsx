@@ -1,21 +1,21 @@
 'use client'
 import { Button } from "@/components/ui/button"
-import { clusterApiUrl, Connection, Keypair, SystemProgram, Transaction } from "@solana/web3.js"
-import { createInitializeMetadataPointerInstruction, createInitializeMintInstruction, createMint, ExtensionType, getMinimumBalanceForRentExemptMint, getMintLen, LENGTH_SIZE, MINT_SIZE, TOKEN_2022_PROGRAM_ID, TYPE_SIZE } from "@solana/spl-token"
+import { clusterApiUrl, Connection, Keypair, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js"
+import { createAssociatedTokenAccountInstruction, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, createMintToCheckedInstruction, ExtensionType, getAssociatedTokenAddressSync, getMintLen, LENGTH_SIZE, TOKEN_2022_PROGRAM_ID, TYPE_SIZE } from "@solana/spl-token"
 import { useRef, useState } from "react"
 import { toast } from "react-toastify";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CropperRef, Cropper } from 'react-advanced-cropper';
+import { CropperRef, Cropper, defaultSize } from 'react-advanced-cropper';
 import 'react-advanced-cropper/dist/style.css'
 import { connectSolana, getSolanaProvider } from "@/utils/web3"
-import { removeFile, uploadFile } from "@/utils/api"
+import { removeFile, saveToken, uploadFile } from "@/utils/api"
 import { createInitializeInstruction, pack, TokenMetadata } from "@solana/spl-token-metadata"
 
 
 export default function CreateToken() {
-    const [mint, setMint] = useState<Keypair>();
+    // const [mint, setMint] = useState<Keypair>();
     const avatarRef = useRef<HTMLInputElement>(null);
     const [imgFile, setImgFile] = useState<File>();
     const [fileInfo, setFileInfo] = useState<{name: string, type: string}>();
@@ -26,30 +26,23 @@ export default function CreateToken() {
     const [symbol, setSymbol] = useState<string>();
     const [description, setDescription] = useState<string>();
     const [decimal, setDecimal] = useState<number>(9);
-    const [supply, setSupply] = useState<number>(1_000_000_000_000_000);
-    const [payer, setPayer] = useState();
+    const [supply, setSupply] = useState<number>(1_000_000);
+    // const [payer, setPayer] = useState();
     const [open, setOpen] = useState(false);
-    
-    const genKeyPair = () => {
-        const key = Keypair.generate();
-        setMint(key);
-    }
-    const download = () => {
-        if (mint) {
-            const url = URL.createObjectURL(new Blob([`[${mint.secretKey.toString()}]`]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `${mint.publicKey.toBase58()}.json`
-            document.body.appendChild(a)
-            a.click()
-            a.remove()
-        }
+
+    const download = (mint: Keypair) => {
+        const url = URL.createObjectURL(new Blob([`[${mint.secretKey.toString()}]`]))
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${mint.publicKey.toBase58()}.json`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
     }
     const onChooseImage = () => {
         if (avatarRef.current?.files![0]) {
             const file = avatarRef.current.files[0];
             setOpen(true);
-            console.log("file", file)
             setFileInfo(file)
             const url = URL.createObjectURL(file)
             setImage(url);
@@ -63,6 +56,11 @@ export default function CreateToken() {
             blob && setImgFile(new File([blob], fileInfo?.name!, {type: 'image/png'}));
         }, 'image/png');
         setPreview(canvas?.toDataURL());
+    }
+    const onCancel = () => {
+        setOpen(false); 
+        setImgFile(avatarRef.current?.files![0]);
+        setPreview(image);
     }
 
     const createToken = async () => {
@@ -84,18 +82,14 @@ export default function CreateToken() {
         }
         const connection = new Connection(clusterApiUrl("devnet"));
         const payer = await connectSolana();
-        if (!mint) {
-            toast.warn("Generate token mint address!");
-            return;
-        }
         if (!payer) {
             toast.warn("Failed to connect your wallet!");
             return;
         }
+        const mint = Keypair.generate();
 
         const image = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, 'token-asset');
         if (!image) return;
-        console.log("uploaded image", image);
         const str = JSON.stringify({
             name,
             symbol,
@@ -108,16 +102,14 @@ export default function CreateToken() {
         });
         const metaFile = await uploadFile(new File([blob], 'metadata.json', {type: "application/json;charset=utf-8"}), 'metadata.json', "application/json;charset=utf-8", 'token-asset')
         if (!metaFile) return;
-        console.log("uploaded metafile", metaFile)
         const metadata: TokenMetadata = {
             mint: mint.publicKey,
             name,
             symbol,
             uri: metaFile,
-            additionalMetadata: [[description, "Only Possible On Solana"]],
+            additionalMetadata: [["description", "Only Possible On Solana"]],
         };
         const mintLen = getMintLen([
-            ExtensionType.TransferFeeConfig, 
             ExtensionType.MetadataPointer
         ]);
         const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
@@ -125,7 +117,10 @@ export default function CreateToken() {
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen + metadataLen);
         
         const programId = TOKEN_2022_PROGRAM_ID;
-        const transaction = new Transaction().add(
+
+        const ata = getAssociatedTokenAddressSync(mint.publicKey, payer, false, programId);
+        
+        const instructions_create = [
             SystemProgram.createAccount({
                 fromPubkey: payer,
                 newAccountPubkey: mint.publicKey,
@@ -145,12 +140,52 @@ export default function CreateToken() {
                 mintAuthority: payer,
                 updateAuthority: payer
             })
-        );
-        transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-        transaction.feePayer = payer;
+        ]
+        const instructions_mint = [
+            createAssociatedTokenAccountInstruction(
+                payer,
+                ata,
+                payer,
+                mint.publicKey,
+                programId
+            ),
+            createMintToCheckedInstruction(
+                mint.publicKey,
+                ata,
+                payer,
+                supply * 10 ** decimal,
+                decimal,
+                [],
+                programId
+              )
+        ]
         try {
-            const { signature } = await getSolanaProvider().signAndSendTransaction(transaction);
-            console.log("signature", signature);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+            const transactionV0_create = new VersionedTransaction(
+                new TransactionMessage({
+                    payerKey: payer,
+                    recentBlockhash,
+                    instructions: instructions_create,
+                  }).compileToV0Message()
+            );
+            transactionV0_create.sign([mint])
+            const transactionV0_mint = new VersionedTransaction(
+                new TransactionMessage({
+                    payerKey: payer,
+                    recentBlockhash,
+                    instructions: instructions_mint
+                }).compileToV0Message()
+            );
+            const provider = getSolanaProvider();
+            const signedTransactions = await provider.signAllTransactions([transactionV0_create, transactionV0_mint])
+            for (const signedTransaction of signedTransactions) {
+                const signature = await connection.sendTransaction(signedTransaction);
+                await connection.confirmTransaction(signature);
+                console.log(`Transaction confirmed with signature: ${signature}`);
+            }
+            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal, `[${mint.secretKey.toString()}]`);
+            download(mint);
+            toast.success(<p>Token mint success! Please check your wallet or <a target="_blank" href={`https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet`}>here</a>.</p>)
         } catch (e) {
             console.log("Error:", e);
             removeFile(image);
@@ -160,7 +195,7 @@ export default function CreateToken() {
 
     return (
         <div className="flex flex-col gap-8 px-16 py-32 w-[50rem] mx-auto">
-            <div className="w-full">
+            {/* <div className="w-full">
                 <Label>Token Mint Address</Label>
                 <div className="flex justify-between items-center gap-4 w-full">
                     <span className="border border-gray flex-1 rounded h-10 leading-10 px-4" onClick={() => {
@@ -172,7 +207,7 @@ export default function CreateToken() {
                     <Button onClick={genKeyPair}>Generate</Button>
                     <Button onClick={download}>Download</Button>
                 </div>
-            </div>
+            </div> */}
             <div className="w-full flex gap-8 justify-between">
                 <div className="w-3/5 flex flex-col items-center gap-4">
                     <div className="w-full">
@@ -216,11 +251,12 @@ export default function CreateToken() {
                         ref={cropperRef}
                         src={image}
                         stencilProps={{
-                            aspectRatio: 1,
+                            aspectRatio: 1
                         }}
                     />
                     <DialogFooter>
-                        <Button onClick={onCrop}>OK</Button>
+                        <Button onClick={onCrop}>Crop</Button>
+                        <Button onClick={onCancel}>Cancel</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
