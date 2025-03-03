@@ -13,10 +13,10 @@ export default function Home() {
 
   useEffect(() => {
     getTokenList(page, size).then(tokens => setTokens(tokens));
-  }, [page, size])
+  }, [page, size]);
   
   return (
-    <div className="flex flex-col py-8 px-4 gap-4 container mx-auto font-[family-name:var(--font-geist-sans)]">
+    <div className="flex flex-col font-[family-name:var(--font-geist-sans)]">
       <div>
         <Button><a href="/create" className="underline-none">Create Token</a></Button>
       </div>
@@ -44,7 +44,7 @@ export default function Home() {
             value: token.user
           },
           url: {
-            value: <img src={token.url}/>
+            value: <img src={token.url} className="size-10 rounded-full aspect-square"/>
           }
         }))} page={page} setPage={setPage} size={size} setSize={setSize} total={total} />
       </div>
