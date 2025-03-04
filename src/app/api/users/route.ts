@@ -8,10 +8,10 @@ export async function GET(
   const page = parseInt(url.searchParams.get("page") || "1");
   const size = parseInt(url.searchParams.get("size") || "10");
   const supabase = await createClient();
-  const id = url.searchParams.get("id");
   const email = url.searchParams.get("email");
-  if (id) {
-    const { data: users } = await supabase.from("users").select().or(`id.eq.${id},email.eq.${email}`);
+  console.log(email);
+  if (email) {
+    const { data: users } = await supabase.from("users").select().eq(`email`, email);
     return new Response(JSON.stringify(users![0]))
   } else {
     const { data: users } = await supabase.from("users").select().order("created_at", { ascending: false }).range(page * size - size, page * size - 1);
@@ -29,26 +29,22 @@ export async function PUT(
   req: Request
 ) {
   const token = req.headers.get('Authorization');
+  console.log(token);
   if (!token || !token.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({
-          message: "wrong credentials",
-          ok: false
-      }))
+    return new Response(JSON.stringify({
+      message: "wrong credentials",
+      ok: false
+    }))
   }
-  const { email, ok, message } = validate_token(token.substring(7));
-  if (!ok) {
-      return new Response(JSON.stringify({
-          message,
-          ok: false
-      }))
-  }
+  const { email } = validate_token(token.substring(7));
   const { name, avatar } = await req.json();
+  console.log(name, avatar);
   const supabase = await createClient();
   const { error } = await supabase.from("users").update({ name, avatar }).eq(`email`, email);
   return new Response(JSON.stringify({
-      message: error?.message || "Updated",
-      ok: !error,
-      token: generate_token(email!, name, avatar)
+    message: error?.message || "Updated",
+    ok: !error,
+    token: generate_token(email!, name, avatar)
   }))
 }
 
