@@ -32,7 +32,7 @@ export async function PUT(
   console.log(token);
   if (!token || !token.startsWith("Bearer ")) {
     return new Response(JSON.stringify({
-      message: "wrong credentials",
+      message: "Wrong Credentials",
       ok: false
     }))
   }

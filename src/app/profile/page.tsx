@@ -8,14 +8,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CropperRef, Cropper } from 'react-advanced-cropper';
 import 'react-advanced-cropper/dist/style.css'
 import { uploadFile } from "@/utils/api"
+import { useGlobalContext } from "@/context/global-context";
 const Profile = () => {
     const avatarRef = useRef<HTMLInputElement>(null);
+    const { user, login } = useGlobalContext();
     const [imgFile, setImgFile] = useState<File>();
     const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
     const cropperRef = useRef<CropperRef>(null);
     const [image, setImage] = useState<string>();
-    const [preview, setPreview] = useState<string>();
-    const [name, setName] = useState<string>();
+    const [preview, setPreview] = useState<string>(user.avatar);
+    const [name, setName] = useState<string>(user.name);
     const [open, setOpen] = useState(false);
 
     const onChooseImage = () => {
@@ -49,6 +51,7 @@ const Profile = () => {
             }
         )
         const data = await reponse.json();
+        login(data.email, data.avatar);
         setName(data.name);
         setPreview(data.avatar);
     }
@@ -89,6 +92,7 @@ const Profile = () => {
                     toast.error("Failed to update the profile!");
                     return;
                 }
+                login(name, image);
                 const { token } = await response.json();
                 localStorage.setItem('token', token);
                 toast.success("Profile updated successfully!");

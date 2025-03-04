@@ -8,17 +8,11 @@ export async function POST(req: NextRequest) {
         const token = req.headers.get('Authorization');
         if (!token || !token.startsWith("Bearer ")) {
             return new NextResponse(JSON.stringify({
-                message: "wrong credentials",
+                message: "Wrong Credentials",
                 ok: false
             }))
         }
-        const { email, name, avatar, ok, message } = validate_token(token.substring(7));
-        if (!ok) {
-            return new NextResponse(JSON.stringify({
-                message,
-                ok: false
-            }))
-        }
+        const { email, name, avatar } = validate_token(token.substring(7));
         const { password, oldPassword } = await req.json();
         const supabase = await createClient();
         const { data: user } = await supabase.from("users").select().eq("email", email).single();
@@ -33,7 +27,7 @@ export async function POST(req: NextRequest) {
             }))
         } else {
             return new NextResponse(JSON.stringify({
-                message: "wrong credentials",
+                message: "Wrong Credentials",
                 ok: false
             }))
         }

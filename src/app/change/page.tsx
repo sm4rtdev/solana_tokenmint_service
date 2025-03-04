@@ -1,39 +1,34 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "react-toastify"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { useGlobalContext } from "@/context/global-context"
 
-
-const SignIn = () => {
-    const router = useRouter()
-    const { user, login } = useGlobalContext();
+const ChangePassword = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const [showOldPassword, setShowOldPassword] = useState(false)
     const [formData, setFormData] = useState({
         email: "",
         password: "",
-        rememberMe: false,
+        oldPassword: ""
     })
     const [errors, setErrors] = useState({
         email: "",
         password: "",
+        oldPassword: ""
     })
 
     const validateForm = () => {
         const newErrors = {
             email: "",
             password: "",
+            oldPassword: ""
         }
         let isValid = true
 
@@ -50,6 +45,11 @@ const SignIn = () => {
             isValid = false
         }
 
+        if (!formData.oldPassword) {
+            newErrors.oldPassword = "Oldpassword is required"
+            isValid = false
+        }
+
         setErrors(newErrors)
         return isValid
     }
@@ -62,39 +62,34 @@ const SignIn = () => {
         }))
     }
 
-    const handleCheckboxChange = (checked: boolean) => {
-        setFormData((prev) => ({
-            ...prev,
-            rememberMe: checked,
-        }))
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!validateForm()) return
 
         setIsLoading(true)
+        const token = localStorage.getItem('token');
+
 
         // Simulate API call
         try {
-            const response = await fetch("/api/auth/login", {
+            const response = await fetch("/api/auth/change-password", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token,
                 },
                 body: JSON.stringify({
                     email: formData.email,
                     password: formData.password,
+                    oldPassword: formData.oldPassword,
                 }),
             })
             const data = await response.json()
 
             if (data.ok) {
                 localStorage.setItem('token', data.token);
-                login(data.name, data.avatar);
                 toast.success(data.message);
-                router.push("/");
 
             }
             else { toast.warn(data.message) }
@@ -123,6 +118,40 @@ const SignIn = () => {
                                 aria-invalid={!!errors.email}
                             />
                             {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="oldpassword">Old Password</Label>
+                            </div>
+                            <div className="relative">
+                                <Input
+                                    id="oldPassword"
+                                    name="oldPassword"
+                                    type={showOldPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    value={formData.oldPassword}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                    aria-invalid={!!errors.oldPassword}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowOldPassword(!showOldPassword)}
+                                    disabled={isLoading}
+                                >
+                                    {showOldPassword ? (
+                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                    <span className="sr-only">{showOldPassword ? "Hide password" : "Show password"}</span>
+                                </Button>
+                            </div>
+                            {errors.oldPassword && <p className="text-sm text-destructive">{errors.oldPassword}</p>}
                         </div>
 
                         <div className="space-y-2">
@@ -157,18 +186,7 @@ const SignIn = () => {
                                 </Button>
                             </div>
                             {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="remember-me"
-                                checked={formData.rememberMe}
-                                onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
-                            />
-                            <Label htmlFor="remember-me" className="text-sm font-normal cursor-pointer">
-                                Remember me
-                            </Label>
-                        </div>
+                        </div>                        
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">
@@ -176,24 +194,16 @@ const SignIn = () => {
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Signing in...
+                                    Change...
                                 </>
                             ) : (
-                                "Sign In"
+                                "Change Password"
                             )}
                         </Button>
-
-                        <div className="text-center text-sm">
-                            Don't have an account?{" "}
-                            <Link href="/auth/register" className="text-primary hover:underline">
-                                Sign up
-                            </Link>
-                        </div>
                     </CardFooter>
                 </form>
             </Card>
         </div>
     )
 }
-export default SignIn;
-
+export default ChangePassword;

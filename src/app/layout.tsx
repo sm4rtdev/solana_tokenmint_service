@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ToastContainer } from "react-toastify"
 import "./globals.css";
 import Navbar from "@/components/navbar/navbar";
+import { GlobalContextProvider } from "@/context/global-context";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,9 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased py-8 px-4 gap-4 container mx-auto`}
       >
-        <ToastContainer />
-        <Navbar/>
-        {children}
+        <GlobalContextProvider>
+          <ToastContainer />
+          <Navbar />
+          {children}
+        </GlobalContextProvider>
       </body>
     </html>
   );

@@ -20,11 +20,13 @@ export async function POST(req: NextRequest) {
             return new NextResponse(JSON.stringify({
                 message: "login success",
                 token: token,
+                name: user.name,
+                avatar: user.avatar,
                 ok: true
             }));
         } else {
             return new NextResponse(JSON.stringify({
-                message: "wrong credentials",
+                message: "Wrong Credentials",
                 ok: false
             }))
         }

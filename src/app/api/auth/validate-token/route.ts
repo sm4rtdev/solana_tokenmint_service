@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
         const token = req.headers.get('Authorization');
         if (!token || !token.startsWith("Bearer ")) {
             return new NextResponse(JSON.stringify({
-                message: "wrong credentials",
+                message: "Wrong Credentials",
                 ok: false
             }))
         }
@@ -52,5 +52,5 @@ export const validate_token = (token: string) => {
 }
 
 export const generate_token = (email: string, name: string, avatar: string | null): string => {
-    return jwt.sign({ email, name, avatar }, SECRET_KEY, { expiresIn: '10d' });
+    return jwt.sign({ email, name, avatar }, SECRET_KEY, { expiresIn: '1d' });
 }
