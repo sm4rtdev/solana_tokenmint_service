@@ -12,41 +12,47 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 const ChangePassword = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setConfirmShowPassword] = useState(false)
     const [showOldPassword, setShowOldPassword] = useState(false)
     const [formData, setFormData] = useState({
-        email: "",
         password: "",
-        oldPassword: ""
+        confirmPassword: "",
+        oldPassword: "",
     })
     const [errors, setErrors] = useState({
-        email: "",
         password: "",
-        oldPassword: ""
+        confirmPassword: "",
+        oldPassword: "",
+        isvalid: "",
     })
 
     const validateForm = () => {
         const newErrors = {
-            email: "",
             password: "",
-            oldPassword: ""
+            confirmPassword: "",
+            oldPassword: "",
+            isvalid: ""
         }
         let isValid = true
-
-        if (!formData.email) {
-            newErrors.email = "Email is required"
-            isValid = false
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = "Email is invalid"
-            isValid = false
-        }
 
         if (!formData.password) {
             newErrors.password = "Password is required"
             isValid = false
         }
 
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = "Confirm Password is required"
+            isValid = false
+        }
+
         if (!formData.oldPassword) {
             newErrors.oldPassword = "Oldpassword is required"
+            isValid = false
+        }
+
+        if (formData.password !== formData.confirmPassword && formData.password && formData.confirmPassword) {
+            newErrors.isvalid = "Passwords do not match"
+            toast.error(newErrors.isvalid);
             isValid = false
         }
 
@@ -80,7 +86,6 @@ const ChangePassword = () => {
                     "Authorization": "Bearer " + token,
                 },
                 body: JSON.stringify({
-                    email: formData.email,
                     password: formData.password,
                     oldPassword: formData.oldPassword,
                 }),
@@ -105,21 +110,6 @@ const ChangePassword = () => {
             <Card>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="name@example.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                                disabled={isLoading}
-                                aria-invalid={!!errors.email}
-                            />
-                            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                        </div>
-                        
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="oldpassword">Old Password</Label>
@@ -156,7 +146,7 @@ const ChangePassword = () => {
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password">New Password</Label>
                             </div>
                             <div className="relative">
                                 <Input
@@ -186,7 +176,41 @@ const ChangePassword = () => {
                                 </Button>
                             </div>
                             {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                        </div>                        
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="password">Confirm Password</Label>
+                            </div>
+                            <div className="relative">
+                                <Input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                    aria-invalid={!!errors.confirmPassword}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setConfirmShowPassword(!showConfirmPassword)}
+                                    disabled={isLoading}
+                                >
+                                    {showConfirmPassword ? (
+                                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                    <span className="sr-only">{showConfirmPassword ? "Hide password" : "Show password"}</span>
+                                </Button>
+                            </div>
+                            {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+                        </div>
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">
