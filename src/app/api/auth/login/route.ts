@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { compareSync } from "bcryptjs";
-import { generate_token } from "../validate-token/route";
+import { generate_token } from "@/utils/jwt";
 
 export async function POST(req: NextRequest) {
     try {
