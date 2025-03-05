@@ -12,6 +12,7 @@ import 'react-advanced-cropper/dist/style.css'
 import { connectSolana, getSolanaProvider } from "@/utils/web3"
 import { removeFile, saveToken, uploadFile } from "@/utils/api"
 import { createInitializeInstruction, pack, TokenMetadata } from "@solana/spl-token-metadata"
+import { Loader2 } from "lucide-react"
 
 
 export default function CreateToken() {
@@ -29,6 +30,7 @@ export default function CreateToken() {
     const [supply, setSupply] = useState<number>(1_000_000);
     // const [payer, setPayer] = useState();
     const [open, setOpen] = useState(false);
+    const [spinner, setSpinner] = useState(false);
 
     const download = (mint: Keypair) => {
         const url = URL.createObjectURL(new Blob([`[${mint.secretKey.toString()}]`]))
@@ -83,12 +85,13 @@ export default function CreateToken() {
             toast.warn("Choose the token avatar!");
             return;
         }
-        const connection = new Connection(clusterApiUrl("devnet"));
         const payer = await connectSolana();
         if (!payer) {
             toast.warn("Failed to connect your wallet!");
             return;
         }
+        setSpinner(true);
+        const connection = new Connection(clusterApiUrl("devnet"));
         const mint = Keypair.generate();
 
         const image = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, 'token-asset');
@@ -194,6 +197,7 @@ export default function CreateToken() {
             removeFile(image);
             removeFile(metaFile)
         }
+        setSpinner(false);
     }
 
     return (
@@ -244,7 +248,16 @@ export default function CreateToken() {
                 <Input placeholder="Token description" value={description} onChange={e => setDescription(e.target.value)} />
             </div>
             <div className="w-full">
-                <Button onClick={createToken}>Create token</Button>
+                <Button onClick={createToken} disabled={spinner}>
+                    {spinner ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Creating token...
+                        </>
+                    ) : (
+                        "Create token"
+                    )}
+                </Button>
             </div>
 
             <Dialog open={open} modal={true}>
