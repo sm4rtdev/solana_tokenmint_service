@@ -22,12 +22,12 @@ const Profile = () => {
 
     const onChooseImage = () => {
         if (avatarRef.current?.files![0]) {
+            // console.log(avatarRef.current?.files![0]);
             const file = avatarRef.current.files[0];
             setOpen(true);
             setFileInfo(file)
             const url = URL.createObjectURL(file)
             setImage(url);
-            avatarRef.current.value = '';
         }
     }
     const onCrop = () => {
@@ -36,6 +36,7 @@ const Profile = () => {
         canvas?.toBlob(blob => {
             blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
         }, 'image/png');
+        avatarRef.current.value = '';
         setPreview(canvas?.toDataURL());
     }
     const onCancel = () => {
@@ -107,24 +108,22 @@ const Profile = () => {
 
     return (
         <div className="flex flex-col gap-8 px-16 py-32 w-[50rem] mx-auto">
-            <div className="w-full flex gap-8 justify-between">
-                <div className="w-3/5 flex flex-col items-center gap-4">
-                    <div className="w-full">
-                        <Label>Your name*</Label>
-                        <Input placeholder="Token name" value={name} onChange={e => setName(e.target.value)} />
-                    </div>
-                </div>
-                <div className="w-2/5 relative">
-                    <Label>Your avatar*</Label>
-                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="mt-4 border border-gray rounded-md h-56 w-full object-contain absolute z-10 opacity-0" />
+            <div className="w-full flex flex-col gap-8 justify-center items-center">
+                <div className="w-full flex justify-center relative mb-60">
+                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="mt-4 border border-gray h-56 aspect-[1/1] rounded-full object-contain absolute z-10 opacity-0" />
                     <img
                         src={preview}
-                        className="mt-4 border border-gray rounded-md h-56 w-full object-contain absolute"
+                        className="mt-4 border border-gray h-56 aspect-[1/1] rounded-full object-contain absolute"
                     />
                 </div>
+                <div className="w-2/5 flex flex-col items-center gap-4">
+                    <div className="w-full">
+                        <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
+                    </div>
+                </div>
             </div>
-            <div className="w-full">
-                <Button onClick={SaveProfile}>Save Profile</Button>
+            <div className="w-full flex justify-center">
+                <Button onClick={SaveProfile} className="w-2/5">Save Profile</Button>
             </div>
             <Dialog open={open} modal={true} >
                 <DialogContent>
@@ -141,7 +140,7 @@ const Profile = () => {
                     />
                     <DialogFooter>
                         <Button onClick={onCrop}>Crop</Button>
-                        <Button onClick={onCancel}>Cancel</Button>
+                        <Button onClick={onCancel}>Uncrop</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

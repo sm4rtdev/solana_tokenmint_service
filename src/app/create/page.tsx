@@ -18,7 +18,7 @@ export default function CreateToken() {
     // const [mint, setMint] = useState<Keypair>();
     const avatarRef = useRef<HTMLInputElement>(null);
     const [imgFile, setImgFile] = useState<File>();
-    const [fileInfo, setFileInfo] = useState<{name: string, type: string}>();
+    const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
     const cropperRef = useRef<CropperRef>(null);
     const [image, setImage] = useState<string>();
     const [preview, setPreview] = useState<string>();
@@ -41,26 +41,29 @@ export default function CreateToken() {
     }
     const onChooseImage = () => {
         if (avatarRef.current?.files![0]) {
+            // console.log(avatarRef.current?.files![0]);
             const file = avatarRef.current.files[0];
             setOpen(true);
             setFileInfo(file)
             const url = URL.createObjectURL(file)
             setImage(url);
-            avatarRef.current.value = '';
+            // avatarRef.current.value = '';
         }
     }
     const onCrop = () => {
         setOpen(false);
-        const canvas = cropperRef.current?.getCanvas({width:128, height:128});
+        const canvas = cropperRef.current?.getCanvas({ width: 128, height: 128 });
         canvas?.toBlob(blob => {
-            blob && setImgFile(new File([blob], fileInfo?.name!, {type: 'image/png'}));
+            blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
         }, 'image/png');
+        avatarRef.current.value = '';
         setPreview(canvas?.toDataURL());
     }
     const onCancel = () => {
-        setOpen(false); 
-        setImgFile(avatarRef.current?.files![0]);
+        setOpen(false);
+        setImgFile(avatarRef.current.files![0]);
         setPreview(image);
+        avatarRef.current.value = '';
     }
 
     const createToken = async () => {
@@ -100,7 +103,7 @@ export default function CreateToken() {
         const blob = new Blob([bytes], {
             type: "application/json;charset=utf-8"
         });
-        const metaFile = await uploadFile(new File([blob], 'metadata.json', {type: "application/json;charset=utf-8"}), 'metadata.json', "application/json;charset=utf-8", 'token-asset')
+        const metaFile = await uploadFile(new File([blob], 'metadata.json', { type: "application/json;charset=utf-8" }), 'metadata.json', "application/json;charset=utf-8", 'token-asset')
         if (!metaFile) return;
         const metadata: TokenMetadata = {
             mint: mint.publicKey,
@@ -115,11 +118,11 @@ export default function CreateToken() {
         const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
 
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen + metadataLen);
-        
+
         const programId = TOKEN_2022_PROGRAM_ID;
 
         const ata = getAssociatedTokenAddressSync(mint.publicKey, payer, false, programId);
-        
+
         const instructions_create = [
             SystemProgram.createAccount({
                 fromPubkey: payer,
@@ -157,7 +160,7 @@ export default function CreateToken() {
                 decimal,
                 [],
                 programId
-              )
+            )
         ]
         try {
             const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
@@ -166,7 +169,7 @@ export default function CreateToken() {
                     payerKey: payer,
                     recentBlockhash,
                     instructions: instructions_create,
-                  }).compileToV0Message()
+                }).compileToV0Message()
             );
             transactionV0_create.sign([mint])
             const transactionV0_mint = new VersionedTransaction(
@@ -227,10 +230,13 @@ export default function CreateToken() {
                         <Input type="number" placeholder="Token supply" value={supply} onChange={e => setSupply(parseInt(e.target.value))} />
                     </div>
                 </div>
-                <div className="w-2/5">
+                <div className="w-2/5 relative">
                     <Label>Token avatar*</Label>
-                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage}/>
-                    <img className="mt-4 border border-gray rounded-md h-56 w-full object-contain" src={preview}/>
+                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="border border-gray rounded-md h-56 w-full object-contain absolute z-10 opacity-0" />
+                    <img
+                        src={preview}
+                        className="mt-4 border border-gray rounded-md h-56 w-full object-contain absolute"
+                    />
                 </div>
             </div>
             <div className="w-full">
@@ -247,7 +253,7 @@ export default function CreateToken() {
                         <DialogTitle>Crop Image</DialogTitle>
                         <DialogDescription></DialogDescription>
                     </DialogHeader>
-                    <Cropper 
+                    <Cropper
                         ref={cropperRef}
                         src={image}
                         stencilProps={{
@@ -256,7 +262,7 @@ export default function CreateToken() {
                     />
                     <DialogFooter>
                         <Button onClick={onCrop}>Crop</Button>
-                        <Button onClick={onCancel}>Cancel</Button>
+                        <Button onClick={onCancel}>Uncrop</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
