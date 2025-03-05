@@ -1,5 +1,5 @@
+import { generate_token, validate_token } from "@/utils/jwt";
 import { createClient } from "@/utils/supabase/server";
-import { generate_token, validate_token } from "../auth/validate-token/route";
 
 export async function GET(
   req: Request
