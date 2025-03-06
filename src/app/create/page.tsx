@@ -209,7 +209,7 @@ export default function CreateToken() {
 
     useEffect(() => {
         if (!user) {
-            location.href = '/auth/signin';
+            location.href = '/auth/signin?redirect=/create';
         }
     }, [])
 

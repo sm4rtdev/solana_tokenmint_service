@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
@@ -16,9 +16,10 @@ import { useGlobalContext } from "@/context/global-context"
 import { login } from "@/utils/api"
 
 
-const SignIn = () => {
+const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
+    const redirect = searchParams.redirect || '/tokens';
     const router = useRouter()
-    const { setUser } = useGlobalContext();
+    const { user, setUser } = useGlobalContext();
     const [isLoading, setIsLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState({
@@ -88,7 +89,7 @@ const SignIn = () => {
                     email: formData.email
                 });
                 toast.success(data.message);
-                router.push("/");
+                router.push(redirect, {scroll: true});
             }
             else { toast.warn(data.message) }
         } catch (error) {
@@ -97,6 +98,12 @@ const SignIn = () => {
             setIsLoading(false)
         }
     }
+
+    useEffect(() => {
+        if (user) {
+            router.push(redirect, {scroll: true});
+        }
+    }, [user])
 
     return (
         <div className="flex w-full justify-center pt-16">
