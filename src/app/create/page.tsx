@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { clusterApiUrl, Connection, Keypair, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js"
 import { createAssociatedTokenAccountInstruction, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, createMintToCheckedInstruction, ExtensionType, getAssociatedTokenAddressSync, getMintLen, LENGTH_SIZE, TOKEN_2022_PROGRAM_ID, TYPE_SIZE } from "@solana/spl-token"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -17,7 +17,6 @@ import { useGlobalContext } from "@/context/global-context"
 
 
 export default function CreateToken() {
-    // const [mint, setMint] = useState<Keypair>();
     const { user } = useGlobalContext();
     const avatarRef = useRef<HTMLInputElement>(null);
     const [imgFile, setImgFile] = useState<File>();
@@ -30,7 +29,6 @@ export default function CreateToken() {
     const [description, setDescription] = useState<string>();
     const [decimal, setDecimal] = useState<number>(9);
     const [supply, setSupply] = useState<number>(1_000_000);
-    // const [payer, setPayer] = useState();
     const [open, setOpen] = useState(false);
     const [spinner, setSpinner] = useState(false);
 
@@ -77,10 +75,6 @@ export default function CreateToken() {
     }
 
     const createToken = async () => {
-        if (!user) {
-            location.href = '/auth/signin';
-            return;
-        }
         if (!name) {
             toast.warn("Input the token name!");
             return;
@@ -201,16 +195,23 @@ export default function CreateToken() {
                 await connection.confirmTransaction(signature);
                 console.log(`Transaction confirmed with signature: ${signature}`);
             }
-            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal, user.email, `[${mint.secretKey.toString()}]`);
+            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal);
             download(mint);
             toast.success(<p>Token mint success! Please check your wallet or <a target="_blank" href={`https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet`}>here</a>.</p>)
         } catch (e) {
             console.log("Error:", e);
             removeFile(image);
-            removeFile(metaFile)
+            removeFile(metaFile);
+            toast.error("Token mint failed! Try again later.")
         }
         setSpinner(false);
     }
+
+    useEffect(() => {
+        if (!user) {
+            location.href = '/auth/signin';
+        }
+    }, [])
 
     return (
         <div className="flex flex-col gap-4 py-16 md:w-[42rem] mx-auto">

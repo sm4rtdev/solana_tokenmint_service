@@ -18,54 +18,64 @@ export const login = async (email: string, password: string): Promise<{ok:boolea
 }
 
 export const changePassword = async (password: string, oldPassword: string): Promise<boolean> => {
-    const token = localStorage.getItem("token");
-    const res = await axios.post(`/api/auth/change-password`, {
-        password,
-        oldPassword
-    }, {
-        headers: {
-            "Authorization": `Bearer ${token}`
+    try {
+        const res = await axios.post(`/api/auth/change-password`, {
+            password,
+            oldPassword
+        }, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+        if (res.data.ok) {
+            localStorage.setItem("token", res.data.token);
+            return true;
         }
-    })
-    if (res.data.ok) {
-        localStorage.setItem("token", res.data.token);
-        return true;
+        return false;
+    } catch (e) {
+        location.href = '/auth/signin';
+        return false;
     }
-    if (res.status === 403) location.href = '/auth/signin';
-    return false;
 }
 
 export const updateUser = async (name: string, avatar: string): Promise<boolean> => {
-    const token = localStorage.getItem("token");
-    const res = await axios.put(`/api/users`, {
-        name,
-        avatar
-    }, {
-        headers: {
-            "Authorization": `Bearer ${token}`
+    try {
+        const res = await axios.put(`/api/users`, {
+            name,
+            avatar
+        }, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+        if (res.data.ok) {
+            localStorage.setItem("token", res.data.token);
+            return true;
         }
-    })
-    if (res.data.ok) {
-        localStorage.setItem("token", res.data.token);
-        return true;
+        return false;
+    } catch (e) {
+        location.href = '/auth/signin';
+        return false;
     }
-    if (res.status === 403) location.href = '/auth/signin';
-    return false;
 }
 
 export const validate_token = async (): Promise<{email: string, name: string, avatar: string} | null> => {
-    const token = localStorage.getItem("token");
-    const res = await axios.post('/api/auth/validate-token', {}, {
-        headers: {
-            "Authorization": `Bearer ${token}`
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.post('/api/auth/validate-token', {}, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+        if (res.data.ok) {
+            localStorage.setItem("token", res.data.token);
+            return res.data;
         }
-    })
-    if (res.data.ok) {
-        localStorage.setItem("token", res.data.token);
-        return res.data;
+        return null
+    } catch (error) {
+        location.href = '/auth/signin';
+        return null;
     }
-    if (res.status === 403) location.href = '/auth/signin';
-    return null;
 }
 
 export const uploadFile = async (file: File, filename: string, type: string = "image/png", folder: string = "avatar"): Promise<string> => {
@@ -93,19 +103,20 @@ export const getTokenList = async (page: number = 1, size: number = 10, email?: 
 }
 
 export const getMyTokens = async (page: number = 1, size: number = 10) : Promise<any[] | null> => {
-    const res = await axios.get(`/api/tokens/my-tokens?page=${page}&size=${size}`, {
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-    if (res.status == 403) {
+    try {
+        const res = await axios.get(`/api/tokens/my-tokens?page=${page}&size=${size}`, {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            }
+        })
+        return res.data;
+    } catch (error) {
         location.href = "/auth/signin";
         return null;
     }
-    return res.data;
 }
 
-export const saveToken = async (address: string, name: string, symbol: string, description: string, url: string, supply: number, decimals: number, user: string, secret?: string) : Promise<boolean> => {
+export const saveToken = async (address: string, name: string, symbol: string, description: string, url: string, supply: number, decimals: number) : Promise<boolean> => {
     const res = await axios.post(`/api/tokens`, {
         address,
         name,
@@ -113,9 +124,11 @@ export const saveToken = async (address: string, name: string, symbol: string, d
         description,
         url,
         supply,
-        decimals,
-        secret,
-        user
+        decimals
+    }, {
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        }
     });
     return res.data.ok;
 }

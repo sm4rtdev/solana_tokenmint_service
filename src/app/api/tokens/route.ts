@@ -1,3 +1,4 @@
+import { validate_token } from "@/utils/jwt";
 import { createClient } from "@/utils/supabase/server";
 
 
@@ -21,10 +22,19 @@ export async function GET(
 export async function POST(
   req: Request
 ) {
+  const access_token = req.headers.get("Authorization");
+  if (!access_token) {
+    return new Response(JSON.stringify({
+        message: "Authentication error",
+        ok: false
+    }) , {status: 403})
+  }
+  const { email:user } = validate_token(access_token.substring(7));
   const token = await req.json();
   const supabase = await createClient();
   const {error} = await supabase.from("tokens").insert({
-    ...token
+    ...token,
+    user
   })
   return new Response(JSON.stringify({
     ok: !error,
