@@ -7,16 +7,18 @@ import { toast } from "react-toastify";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CropperRef, Cropper, defaultSize } from 'react-advanced-cropper';
+import { CropperRef, Cropper, } from 'react-advanced-cropper';
 import 'react-advanced-cropper/dist/style.css'
 import { connectSolana, getSolanaProvider } from "@/utils/web3"
 import { removeFile, saveToken, uploadFile } from "@/utils/api"
 import { createInitializeInstruction, pack, TokenMetadata } from "@solana/spl-token-metadata"
 import { Loader2 } from "lucide-react"
+import { useGlobalContext } from "@/context/global-context"
 
 
 export default function CreateToken() {
     // const [mint, setMint] = useState<Keypair>();
+    const { user } = useGlobalContext();
     const avatarRef = useRef<HTMLInputElement>(null);
     const [imgFile, setImgFile] = useState<File>();
     const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
@@ -54,21 +56,31 @@ export default function CreateToken() {
     }
     const onCrop = () => {
         setOpen(false);
-        const canvas = cropperRef.current?.getCanvas({ width: 128, height: 128 });
-        canvas?.toBlob(blob => {
-            blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
-        }, 'image/png');
-        avatarRef.current.value = '';
-        setPreview(canvas?.toDataURL());
+        if (cropperRef.current && avatarRef.current) {
+            avatarRef.current.value = '';
+            const canvas = cropperRef.current?.getCanvas({ width: 128, height: 128 });
+            if (canvas) {
+                canvas.toBlob(blob => {
+                    blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
+                }, 'image/png');
+                setPreview(canvas.toDataURL());
+            }
+        }
     }
     const onCancel = () => {
         setOpen(false);
-        setImgFile(avatarRef.current.files![0]);
-        setPreview(image);
-        avatarRef.current.value = '';
+        if (cropperRef.current && avatarRef.current) {
+            setImgFile(avatarRef.current.files![0]);
+            setPreview(image);
+            avatarRef.current.value = '';
+        }
     }
 
     const createToken = async () => {
+        if (!user) {
+            location.href = '/auth/signin';
+            return;
+        }
         if (!name) {
             toast.warn("Input the token name!");
             return;
@@ -189,7 +201,7 @@ export default function CreateToken() {
                 await connection.confirmTransaction(signature);
                 console.log(`Transaction confirmed with signature: ${signature}`);
             }
-            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal, `[${mint.secretKey.toString()}]`);
+            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal, user.email, `[${mint.secretKey.toString()}]`);
             download(mint);
             toast.success(<p>Token mint success! Please check your wallet or <a target="_blank" href={`https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet`}>here</a>.</p>)
         } catch (e) {
@@ -201,22 +213,9 @@ export default function CreateToken() {
     }
 
     return (
-        <div className="flex flex-col gap-8 px-16 py-32 w-[50rem] mx-auto">
-            {/* <div className="w-full">
-                <Label>Token Mint Address</Label>
-                <div className="flex justify-between items-center gap-4 w-full">
-                    <span className="border border-gray flex-1 rounded h-10 leading-10 px-4" onClick={() => {
-                        if (mint) {
-                            navigator.clipboard.writeText(mint?.publicKey.toBase58())
-                            toast("Address copied!")
-                        }
-                    }}>{mint?.publicKey.toBase58()}</span>
-                    <Button onClick={genKeyPair}>Generate</Button>
-                    <Button onClick={download}>Download</Button>
-                </div>
-            </div> */}
+        <div className="flex flex-col gap-4 py-16 md:w-[42rem] mx-auto">
             <div className="w-full flex gap-8 justify-between">
-                <div className="w-3/5 flex flex-col items-center gap-4">
+                <div className="w-3/5 flex flex-col items-center gap-2">
                     <div className="w-full">
                         <Label>Token name*</Label>
                         <Input placeholder="Token name" value={name} onChange={e => setName(e.target.value)} />
@@ -236,10 +235,10 @@ export default function CreateToken() {
                 </div>
                 <div className="w-2/5 relative">
                     <Label>Token avatar*</Label>
-                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="border border-gray rounded-md h-56 w-full object-contain absolute z-10 opacity-0" />
+                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="cursor-pointer border border-gray rounded-md h-64 w-full object-contain absolute z-10 opacity-0" />
                     <img
                         src={preview}
-                        className="mt-4 border border-gray rounded-md h-56 w-full object-contain absolute"
+                        className="border border-gray rounded-md h-64 w-full object-contain absolute"
                     />
                 </div>
             </div>

@@ -8,14 +8,14 @@ export async function GET(
   const page = parseInt(url.searchParams.get("page") || "1");
   const size = parseInt(url.searchParams.get("size") || "10");
   const user = url.searchParams.get("user");
-  let users = null
+  let tokens: any[] | null = []
   const supabase = await createClient();
   if (user) {
-    users = (await supabase.from("tokens").select().eq("user", user).order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;
+    tokens = (await supabase.from("tokens").select("name, created_at, url, address, symbol, description, decimals, supply").eq("user", user).order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;
   } else {
-    users = (await supabase.from("tokens").select().order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;
+    tokens = (await supabase.from("tokens").select("name, created_at, url, address, symbol, description, decimals, supply").order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;
   }
-  return new Response(JSON.stringify(users))
+  return new Response(JSON.stringify(tokens))
 }
 
 export async function POST(

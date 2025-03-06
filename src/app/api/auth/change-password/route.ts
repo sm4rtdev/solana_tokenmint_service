@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
             return new NextResponse(JSON.stringify({
                 message: "Wrong Credentials",
                 ok: false
-            }))
+            }), {status: 403})
         }
     }
     catch (error) {
