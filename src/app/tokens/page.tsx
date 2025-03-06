@@ -11,7 +11,7 @@ export default function MyTokens() {
   const [total, setTotal] = useState(Math.ceil(1/size));
 
   useEffect(() => {
-    getMyTokens(page, size).then(tokens => setTokens(tokens));
+    getMyTokens(page, size).then(tokens => tokens && setTokens(tokens));
   }, [page, size]);
   
   return (

@@ -14,9 +14,9 @@ const Profile = () => {
     const [imgFile, setImgFile] = useState<File>();
     const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
     const cropperRef = useRef<CropperRef>(null);
-    const [image, setImage] = useState<string>();
-    const [preview, setPreview] = useState<string>(user.avatar);
-    const [name, setName] = useState<string>(user.name);
+    const [image, setImage] = useState<string>("");
+    const [preview, setPreview] = useState<string>(user?user.avatar:"");
+    const [name, setName] = useState<string>(user?user.name:"");
     const [open, setOpen] = useState(false);
 
     const onChooseImage = () => {
@@ -31,23 +31,22 @@ const Profile = () => {
     }
     const onCrop = () => {
         setOpen(false);
-        const canvas = cropperRef.current?.getCanvas({ width: 128, height: 128 });
-        canvas?.toBlob(blob => {
-            blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
-        }, 'image/png');
-        avatarRef.current.value = '';
-        setPreview(canvas?.toDataURL());
+        if (cropperRef.current && avatarRef.current) {
+            avatarRef.current.value = '';
+            const canvas = cropperRef.current.getCanvas({ width: 128, height: 128 });
+            if (canvas) {
+                canvas.toBlob(blob => {
+                    blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
+                }, 'image/png');
+                setPreview(canvas.toDataURL());
+            }
+        }
     }
     const onCancel = () => {
         setOpen(false);
         setImgFile(avatarRef.current?.files![0]);
         setPreview(image);
     }
-
-    useEffect(() => {
-        setName(user.name);
-        setPreview(user.avatar);
-    }, [])
 
     const SaveProfile = async () => {
         if (!name) {
@@ -63,7 +62,7 @@ const Profile = () => {
         try {
             const res = await updateUser(name, avatar);
             if (res) {
-                setUser(prev => ({...prev, name, avatar}))
+                setUser({email: user? user.email: "", name, avatar})
                 toast.success("Profile updated successfully!");
             }
         }

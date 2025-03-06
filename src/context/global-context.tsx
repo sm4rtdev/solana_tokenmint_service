@@ -11,7 +11,7 @@ type User = {
 // Define the shape of your context state
 type GlobalContextType = {
     user: User | null,
-    setUser: Dispatch<SetStateAction<User>>
+    setUser: Dispatch<SetStateAction<User | null>>
 }
 
 // Create the context with default values
@@ -22,7 +22,7 @@ const GlobalContext = createContext<GlobalContextType>({
 
 // Create a provider component
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User>(null);
+    const [user, setUser] = useState<User | null>(null);
     useEffect(() => {
         validate_token().then(data => setUser(data))
     }, [])

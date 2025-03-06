@@ -56,21 +56,31 @@ export default function CreateToken() {
     }
     const onCrop = () => {
         setOpen(false);
-        const canvas = cropperRef.current?.getCanvas({ width: 128, height: 128 });
-        canvas?.toBlob(blob => {
-            blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
-        }, 'image/png');
-        avatarRef.current.value = '';
-        setPreview(canvas?.toDataURL());
+        if (cropperRef.current && avatarRef.current) {
+            avatarRef.current.value = '';
+            const canvas = cropperRef.current?.getCanvas({ width: 128, height: 128 });
+            if (canvas) {
+                canvas.toBlob(blob => {
+                    blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
+                }, 'image/png');
+                setPreview(canvas.toDataURL());
+            }
+        }
     }
     const onCancel = () => {
         setOpen(false);
-        setImgFile(avatarRef.current.files![0]);
-        setPreview(image);
-        avatarRef.current.value = '';
+        if (cropperRef.current && avatarRef.current) {
+            setImgFile(avatarRef.current.files![0]);
+            setPreview(image);
+            avatarRef.current.value = '';
+        }
     }
 
     const createToken = async () => {
+        if (!user) {
+            location.href = '/auth/signin';
+            return;
+        }
         if (!name) {
             toast.warn("Input the token name!");
             return;

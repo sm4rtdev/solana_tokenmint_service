@@ -8,7 +8,7 @@ export async function GET(
   const page = parseInt(url.searchParams.get("page") || "1");
   const size = parseInt(url.searchParams.get("size") || "10");
   const user = url.searchParams.get("user");
-  let tokens = []
+  let tokens: any[] | null = []
   const supabase = await createClient();
   if (user) {
     tokens = (await supabase.from("tokens").select("name, created_at, url, address, symbol, description, decimals, supply").eq("user", user).order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;

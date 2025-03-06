@@ -11,7 +11,7 @@ export default function Home() {
   const [total, setTotal] = useState(Math.ceil(1/size));
 
   useEffect(() => {
-    getTokenList(page, size).then(tokens => setTokens(tokens));
+    getTokenList(page, size).then(tokens => tokens && setTokens(tokens));
   }, [page, size]);
   
   return (

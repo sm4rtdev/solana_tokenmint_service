@@ -92,7 +92,7 @@ export const getTokenList = async (page: number = 1, size: number = 10, email?: 
     return res.data;
 }
 
-export const getMyTokens = async (page: number = 1, size: number = 10) : Promise<any[]> => {
+export const getMyTokens = async (page: number = 1, size: number = 10) : Promise<any[] | null> => {
     const res = await axios.get(`/api/tokens/my-tokens?page=${page}&size=${size}`, {
         headers: {
             "Authorization": "Bearer " + localStorage.getItem("token")
