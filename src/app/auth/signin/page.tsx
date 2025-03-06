@@ -13,11 +13,12 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { useGlobalContext } from "@/context/global-context"
+import { login } from "@/utils/api"
 
 
 const SignIn = () => {
     const router = useRouter()
-    const { user, login } = useGlobalContext();
+    const { setUser } = useGlobalContext();
     const [isLoading, setIsLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState({
@@ -78,24 +79,16 @@ const SignIn = () => {
 
         // Simulate API call
         try {
-            const response = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password,
-                }),
-            })
-            const data = await response.json()
+            const data = await login(formData.email, formData.password);
 
             if (data.ok) {
                 localStorage.setItem('token', data.token);
-                login(data.name, data.avatar);
+                setUser({
+                    ...data,
+                    email: formData.email
+                });
                 toast.success(data.message);
                 router.push("/");
-
             }
             else { toast.warn(data.message) }
         } catch (error) {
@@ -106,7 +99,7 @@ const SignIn = () => {
     }
 
     return (
-        <div className="flex w-full justify-center">
+        <div className="flex w-full justify-center pt-16">
             <Card>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
@@ -134,7 +127,7 @@ const SignIn = () => {
                                     id="password"
                                     name="password"
                                     type={showPassword ? "text" : "password"}
-                                    placeholder="••••••••"
+                                    placeholder="Password"
                                     value={formData.password}
                                     onChange={handleChange}
                                     disabled={isLoading}

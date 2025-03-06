@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { register } from "@/utils/api"
 const Register = () => {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
@@ -94,20 +95,13 @@ const Register = () => {
 
         // Simulate API call
         try {
-            const response = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                }),
-            });
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+            const res = await register(formData.name, formData.email, formData.password);
 
-            toast.success("You have successfully created an account.")
+            if (res) {
+                toast.success("You have successfully created an account.")
+            } else {
+                toast.warn("You already have an account.")
+            }
 
             router.push("/auth/signin")
         } catch (error) {
@@ -118,7 +112,7 @@ const Register = () => {
     }
 
     return (
-        <div className="flex w-full justify-center">
+        <div className="flex w-full justify-center pt-16">
             <Card>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">

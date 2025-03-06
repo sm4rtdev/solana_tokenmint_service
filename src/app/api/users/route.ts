@@ -34,7 +34,7 @@ export async function PUT(
     return new Response(JSON.stringify({
       message: "Wrong Credentials",
       ok: false
-    }))
+    }), {status: 403})
   }
   const { email } = validate_token(token.substring(7));
   const { name, avatar } = await req.json();

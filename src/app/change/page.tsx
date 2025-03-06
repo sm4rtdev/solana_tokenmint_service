@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { changePassword } from "@/utils/api"
 
 const ChangePassword = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -74,30 +75,13 @@ const ChangePassword = () => {
         if (!validateForm()) return
 
         setIsLoading(true)
-        const token = localStorage.getItem('token');
-
 
         // Simulate API call
         try {
-            const response = await fetch("/api/auth/change-password", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token,
-                },
-                body: JSON.stringify({
-                    password: formData.password,
-                    oldPassword: formData.oldPassword,
-                }),
-            })
-            const data = await response.json()
-
-            if (data.ok) {
-                localStorage.setItem('token', data.token);
-                toast.success(data.message);
-
+            const res = await changePassword(formData.password, formData.oldPassword)
+            if (res) {
+                toast.success("Your password successfully updated.");
             }
-            else { toast.warn(data.message) }
         } catch (error) {
             toast.error("Failed to sign in. Please try again.")
         } finally {
@@ -106,7 +90,7 @@ const ChangePassword = () => {
     }
 
     return (
-        <div className="flex w-full justify-center">
+        <div className="flex w-full justify-center pt-16">
             <Card>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
@@ -119,7 +103,7 @@ const ChangePassword = () => {
                                     id="oldPassword"
                                     name="oldPassword"
                                     type={showOldPassword ? "text" : "password"}
-                                    placeholder="••••••••"
+                                    placeholder="Old password"
                                     value={formData.oldPassword}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -153,7 +137,7 @@ const ChangePassword = () => {
                                     id="password"
                                     name="password"
                                     type={showPassword ? "text" : "password"}
-                                    placeholder="••••••••"
+                                    placeholder="New password"
                                     value={formData.password}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -187,7 +171,7 @@ const ChangePassword = () => {
                                     id="confirmPassword"
                                     name="confirmPassword"
                                     type={showConfirmPassword ? "text" : "password"}
-                                    placeholder="••••••••"
+                                    placeholder="Confirm password"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     disabled={isLoading}

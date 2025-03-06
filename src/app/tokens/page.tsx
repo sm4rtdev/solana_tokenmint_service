@@ -1,17 +1,17 @@
 'use client'
 
 import MyTable from "@/components/table/Table";
-import { getTokenList } from "@/utils/api";
+import { getMyTokens } from "@/utils/api";
 import { useEffect, useState } from "react";
 
-export default function Home() {
+export default function MyTokens() {
   const [tokens, setTokens] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [total, setTotal] = useState(Math.ceil(1/size));
 
   useEffect(() => {
-    getTokenList(page, size).then(tokens => setTokens(tokens));
+    getMyTokens(page, size).then(tokens => setTokens(tokens));
   }, [page, size]);
   
   return (

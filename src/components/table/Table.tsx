@@ -56,13 +56,13 @@ const MyTable = ({
         <Table>
           <TableHeader>
             <TableRow>
-                {header.map((item, index) => (<TableHead key={index}>{item.value}</TableHead>))}
+                {header.map((item, index) => (<TableHead key={index} className="text-center">{item.value}</TableHead>))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {body.map((row, index) => (
               <TableRow key={index}>
-                {header.map((cell, index) => (<TableCell key={index}>{row[cell.key].value}</TableCell>))}
+                {header.map((cell, index) => (<TableCell key={index} className="mx-auto text-center">{row[cell.key].value}</TableCell>))}
               </TableRow>
             ))}
           </TableBody>
