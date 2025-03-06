@@ -37,15 +37,15 @@ const Navbar = () => {
                             }
                         </MenubarTrigger>
                         <MenubarContent className=" absolute -right-14">
-                            <MenubarItem onClick={() => route.push('/profile')}>
+                            <MenubarItem onClick={() => route.push('/profile', {scroll: true})}>
                                 Profile
                             </MenubarItem>
                             <MenubarSeparator />
-                            <MenubarItem onClick={() => { route.push('/change') }}>
+                            <MenubarItem onClick={() => { route.push('/change', {scroll: true}) }}>
                                 Change Password
                             </MenubarItem>
                             <MenubarSeparator />
-                            <MenubarItem onClick={() => { localStorage.removeItem('token'); setUser(null); route.push('/auth/signin') }}>
+                            <MenubarItem onClick={() => { localStorage.removeItem('token'); setUser(null); route.push('/') }}>
                                 Sign Out
                             </MenubarItem>
                         </MenubarContent>
