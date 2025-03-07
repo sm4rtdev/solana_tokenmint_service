@@ -15,9 +15,14 @@ const Profile = () => {
     const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
     const cropperRef = useRef<CropperRef>(null);
     const [image, setImage] = useState<string>("");
-    const [preview, setPreview] = useState<string>(user?user.avatar:"");
-    const [name, setName] = useState<string>(user?user.name:"");
+    const [preview, setPreview] = useState<string>("");
+    const [name, setName] = useState<string>("");
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        setName(user?user.name:"")
+        setPreview(user?user.avatar:"")
+    }, [user])
 
     const onChooseImage = () => {
         if (avatarRef.current?.files![0]) {
@@ -77,11 +82,11 @@ const Profile = () => {
         <div className="flex flex-col gap-8 px-16 py-16 w-[50rem] mx-auto">
             <div className="w-full flex flex-col gap-8 justify-center items-center">
                 <div className="w-full flex justify-center relative mb-60">
-                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="mt-4 border border-gray h-56 aspect-[1/1] rounded-full object-contain absolute z-10 opacity-0" />
-                    <img
+                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="mt-4 border border-gray h-56 w-56 rounded-full object-contain absolute z-10 opacity-0" />
+                    {preview ? <img
                         src={preview}
-                        className="mt-4 border border-gray h-56 aspect-[1/1] rounded-full object-contain absolute"
-                    />
+                        className="mt-4 border h-56 aspect-[1/1] rounded-full object-contain absolute"
+                    /> : <div className="mt-4 border border-[#afafaf5c] bg-[#090909] h-56 aspect-[1/1] rounded-full absolute"></div>}
                 </div>
                 <div className="w-2/5 flex flex-col items-center gap-4">
                     <div className="w-full">
