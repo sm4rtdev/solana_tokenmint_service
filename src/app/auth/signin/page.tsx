@@ -16,7 +16,7 @@ import { useGlobalContext } from "@/context/global-context"
 import { login } from "@/utils/api"
 
 
-const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
+const SignIn = ({ searchParams }: { searchParams: { [key: string]: string } }) => {
     const redirect = searchParams.redirect || '/tokens';
     const router = useRouter()
     const { user, setUser } = useGlobalContext();
@@ -89,7 +89,7 @@ const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
                     email: formData.email
                 });
                 toast.success(data.message);
-                router.push(redirect, {scroll: true});
+                router.push(redirect, { scroll: true });
             }
             else { toast.warn(data.message) }
         } catch (error) {
@@ -101,13 +101,13 @@ const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
 
     useEffect(() => {
         if (user) {
-            router.push(redirect, {scroll: true});
+            router.push(redirect, { scroll: true });
         }
     }, [user])
 
     return (
-        <div className="flex w-full justify-center pt-16">
-            <Card>
+        <div className="flex w-full justify-center pt-16 items-center h-full">
+            <Card className="bg-[#090909] text-white border-0 py-6">
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
                         <div className="space-y-2">
@@ -119,6 +119,7 @@ const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
                                 placeholder="name@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
+                                className="bg-[#090909]"
                                 disabled={isLoading}
                                 aria-invalid={!!errors.email}
                             />
@@ -138,6 +139,7 @@ const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     disabled={isLoading}
+                                    className="bg-[#090909]"
                                     aria-invalid={!!errors.password}
                                 />
                                 <Button
@@ -185,7 +187,7 @@ const SignIn = ({ searchParams}: {searchParams: { [key:string]: string}}) => {
 
                         <div className="text-center text-sm">
                             Don't have an account?{" "}
-                            <Link href="/auth/register" className="text-primary hover:underline">
+                            <Link href="/auth/register" className="font-bold text-[16px] hover:underline">
                                 Sign up
                             </Link>
                         </div>

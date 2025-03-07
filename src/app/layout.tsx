@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#1b1622] text-white`}
       >
         <div className="py-8 px-4 gap-4 container mx-auto">
           <GlobalContextProvider>
