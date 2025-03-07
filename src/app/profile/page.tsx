@@ -85,12 +85,12 @@ const Profile = () => {
                 </div>
                 <div className="w-2/5 flex flex-col items-center gap-4">
                     <div className="w-full">
-                        <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
+                        <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} className="bg-[#090909]"/>
                     </div>
                 </div>
             </div>
             <div className="w-full flex justify-center">
-                <Button onClick={SaveProfile} className="w-2/5">Save Profile</Button>
+                <Button onClick={SaveProfile} className="w-2/5 hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]">Save Profile</Button>
             </div>
             <Dialog open={open} modal={true} >
                 <DialogContent>
