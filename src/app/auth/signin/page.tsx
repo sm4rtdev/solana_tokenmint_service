@@ -174,7 +174,7 @@ const SignIn = ({ searchParams }: { searchParams: { [key: string]: string } }) =
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full w-full bg-gradient-to-r to-[#351166] from-[#b55ced]" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

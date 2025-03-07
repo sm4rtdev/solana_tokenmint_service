@@ -24,8 +24,8 @@ const Navbar = () => {
             <MenubarMenu>
                 <Image src={logo} alt="logo" className="h-full w-fit cursor-pointer" onClick={() => route.push("/", {scroll:true})} />
                 <div className="flex items-center justify-center gap-8">
-                    <span className="hover:to-white hover:from-white  hover:text-black py-4 px-8 rounded-full cursor-pointer bg-gradient-to-r to-[#351166] from-[#b55ced]" onClick={() => route.push("/tokens", {scroll:true})}>MY TOKENS</span>
-                    <span className="hover:to-white hover:from-white  hover:text-black py-4 px-8 rounded-full cursor-pointer bg-gradient-to-r to-[#351166] from-[#b55ced]" onClick={() => route.push("/create", {scroll:true})}>CREATE TOKEN</span>
+                    <span className="hover:to-white hover:from-white  hover:text-black py-3 px-8 rounded-full cursor-pointer bg-gradient-to-r to-[#351166] from-[#b55ced]" onClick={() => route.push("/tokens", {scroll:true})}>MY TOKENS</span>
+                    <span className="hover:to-white hover:from-white  hover:text-black py-3 px-8 rounded-full cursor-pointer bg-gradient-to-r to-[#351166] from-[#b55ced]" onClick={() => route.push("/create", {scroll:true})}>CREATE TOKEN</span>
                 </div>
                 {
                     user ?
@@ -36,7 +36,7 @@ const Navbar = () => {
                                     <CiUser className="size-12 rounded-full border-black border-2" />
                             }
                         </MenubarTrigger>
-                        <MenubarContent className=" absolute -right-14">
+                        <MenubarContent className=" absolute -right-14 bg-[#090909] shadow-md shadow-gray-400 text-white">
                             <MenubarItem onClick={() => route.push('/profile', {scroll: true})}>
                                 Profile
                             </MenubarItem>
