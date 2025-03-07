@@ -91,7 +91,7 @@ const ChangePassword = () => {
 
     return (
         <div className="flex w-full justify-center pt-16">
-            <Card>
+            <Card className="bg-[#090909] text-white border-0 py-6">
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
                         <div className="space-y-2">
@@ -105,7 +105,8 @@ const ChangePassword = () => {
                                     type={showOldPassword ? "text" : "password"}
                                     placeholder="Old password"
                                     value={formData.oldPassword}
-                                    onChange={handleChange}
+                                    onChange={handleChange} 
+                                    className="bg-[#090909]"
                                     disabled={isLoading}
                                     aria-invalid={!!errors.oldPassword}
                                 />
@@ -138,6 +139,7 @@ const ChangePassword = () => {
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     placeholder="New password"
+                                    className="bg-[#090909]"
                                     value={formData.password}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -172,6 +174,7 @@ const ChangePassword = () => {
                                     name="confirmPassword"
                                     type={showConfirmPassword ? "text" : "password"}
                                     placeholder="Confirm password"
+                                    className="bg-[#090909]"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -198,7 +201,7 @@ const ChangePassword = () => {
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
