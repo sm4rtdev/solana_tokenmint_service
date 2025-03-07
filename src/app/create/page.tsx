@@ -219,24 +219,24 @@ export default function CreateToken() {
                 <div className="w-3/5 flex flex-col items-center gap-2">
                     <div className="w-full">
                         <Label>Token name*</Label>
-                        <Input placeholder="Token name" value={name} onChange={e => setName(e.target.value)} />
+                        <Input placeholder="Token name" className="bg-[#090909]" value={name} onChange={e => setName(e.target.value)} />
                     </div>
                     <div className="w-full">
                         <Label>Token symbol*</Label>
-                        <Input placeholder="Token symbol, e.g. USDT" value={symbol} onChange={e => setSymbol(e.target.value)} />
+                        <Input placeholder="Token symbol, e.g. USDT" className="bg-[#090909]" value={symbol} onChange={e => setSymbol(e.target.value)} />
                     </div>
                     <div className="w-full">
                         <Label>Token decimal*</Label>
-                        <Input type="number" placeholder="Token decimal" value={decimal} onChange={e => setDecimal(parseInt(e.target.value))} />
+                        <Input type="number" placeholder="Token decimal" className="bg-[#090909]" value={decimal} onChange={e => setDecimal(parseInt(e.target.value))} />
                     </div>
                     <div className="w-full">
                         <Label>Token supply*</Label>
-                        <Input type="number" placeholder="Token supply" value={supply} onChange={e => setSupply(parseInt(e.target.value))} />
+                        <Input type="number" placeholder="Token supply" className="bg-[#090909]" value={supply} onChange={e => setSupply(parseInt(e.target.value))} />
                     </div>
                 </div>
                 <div className="w-2/5 relative">
                     <Label>Token avatar*</Label>
-                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="cursor-pointer border border-gray rounded-md h-64 w-full object-contain absolute z-10 opacity-0" />
+                    <Input type="file" ref={avatarRef} accept="image/png"  onChange={onChooseImage} className="cursor-pointer border border-gray rounded-md h-64 w-full object-contain absolute z-10 opacity-0" />
                     <img
                         src={preview}
                         className="border border-gray rounded-md h-64 w-full object-contain absolute"
@@ -245,10 +245,10 @@ export default function CreateToken() {
             </div>
             <div className="w-full">
                 <Label>Token description*</Label>
-                <Input placeholder="Token description" value={description} onChange={e => setDescription(e.target.value)} />
+                <Input placeholder="Token description" className="bg-[#090909]" value={description} onChange={e => setDescription(e.target.value)} />
             </div>
-            <div className="w-full">
-                <Button onClick={createToken} disabled={spinner}>
+            <div className="w-full flex justify-end mt-4">
+                <Button onClick={createToken} disabled={spinner} className="w-2/5 hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]">
                     {spinner ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

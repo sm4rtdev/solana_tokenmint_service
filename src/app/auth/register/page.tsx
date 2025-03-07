@@ -113,7 +113,7 @@ const Register = () => {
 
     return (
         <div className="flex w-full justify-center pt-16">
-            <Card>
+            <Card className="bg-[#090909] text-white border-0 py-6">
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
                         <div className="space-y-2">
@@ -122,6 +122,7 @@ const Register = () => {
                                 id="name"
                                 name="name"
                                 placeholder="John Doe"
+                                className="bg-[#090909]"
                                 value={formData.name}
                                 onChange={handleChange}
                                 disabled={isLoading}
@@ -137,6 +138,7 @@ const Register = () => {
                                 name="email"
                                 type="email"
                                 placeholder="name@example.com"
+                                className="bg-[#090909]"
                                 value={formData.email}
                                 onChange={handleChange}
                                 disabled={isLoading}
@@ -153,6 +155,7 @@ const Register = () => {
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
+                                    className="bg-[#090909]"
                                     value={formData.password}
                                     onChange={handleChange}
                                     disabled={isLoading}
@@ -193,7 +196,7 @@ const Register = () => {
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full w-full bg-gradient-to-r to-[#351166] from-[#b55ced]" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -206,7 +209,7 @@ const Register = () => {
 
                         <div className="text-center text-sm">
                             Already have an account?{" "}
-                            <Link href="signin" className="text-primary hover:underline">
+                            <Link href="signin" className="font-bold text-[16px] hover:underline">
                                 Sign in
                             </Link>
                         </div>
