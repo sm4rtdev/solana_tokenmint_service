@@ -87,3 +87,10 @@ body {
     @apply bg-background text-foreground;
   }
 }
+.ring-offset-background {
+  --tw-ring-offset-color: hsl(233.57deg 100% 73.35%);
+}
+
+input, img {
+  border-color: rgba(175, 175, 175, 0.363) !important;
+}

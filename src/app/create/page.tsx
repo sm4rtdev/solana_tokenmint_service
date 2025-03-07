@@ -237,10 +237,10 @@ export default function CreateToken() {
                 <div className="w-2/5 relative">
                     <Label>Token avatar*</Label>
                     <Input type="file" ref={avatarRef} accept="image/png"  onChange={onChooseImage} className="cursor-pointer border border-gray rounded-md h-64 w-full object-contain absolute z-10 opacity-0" />
-                    <img
+                    {preview ? <img
                         src={preview}
-                        className="border border-gray rounded-md h-64 w-full object-contain absolute"
-                    />
+                        className="border rounded-md h-64 w-full object-contain absolute"
+                    /> : <div className="border border-[#afafaf5c] bg-[#090909] rounded-md h-64 w-full absolute"></div>}
                 </div>
             </div>
             <div className="w-full">
