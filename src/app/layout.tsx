@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <div className="py-8 px-4 gap-4 container mx-auto">
           <GlobalContextProvider>
-            <ToastContainer />
+            <ToastContainer theme="dark" />
             <Navbar />
             {children}
           </GlobalContextProvider>

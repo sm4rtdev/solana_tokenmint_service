@@ -11,23 +11,34 @@ type User = {
 // Define the shape of your context state
 type GlobalContextType = {
     user: User | null,
-    setUser: Dispatch<SetStateAction<User | null>>
+    setUser: Dispatch<SetStateAction<User | null>>,
+    net: "mainnet" | "devnet",
+    setNet: Dispatch<SetStateAction<"mainnet" | "devnet">>
 }
 
 // Create the context with default values
 const GlobalContext = createContext<GlobalContextType>({
     user: null,
-    setUser: () => {}
+    setUser: () => {},
+    net: "mainnet",
+    setNet: () => {}
 })
 
 // Create a provider component
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    const [net, setNet] = useState<"mainnet" | "devnet">("mainnet");
     useEffect(() => {
         validate_token().then(data => setUser(data))
+        const net = localStorage.getItem("net") === "devnet" ? "devnet" : "mainnet";
+        setNet(net);
     }, [])
 
-    return <GlobalContext.Provider value={{ user, setUser }}>{children}</GlobalContext.Provider>
+    useEffect(() => {
+        net === "devnet" ? localStorage.setItem("net", "devnet") : localStorage.removeItem("net")
+    }, [net])
+
+    return <GlobalContext.Provider value={{ user, setUser, net, setNet }}>{children}</GlobalContext.Provider>
 }
 
 // Create a custom hook to use the context

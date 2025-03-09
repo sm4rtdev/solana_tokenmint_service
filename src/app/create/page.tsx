@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation"
 
 
 export default function CreateToken() {
-    const { user } = useGlobalContext();
+    const { user, net } = useGlobalContext();
     const router = useRouter();
     const avatarRef = useRef<HTMLInputElement>(null);
     const [imgFile, setImgFile] = useState<File>();
@@ -54,13 +54,11 @@ export default function CreateToken() {
     }
     const onChooseImage = () => {
         if (avatarRef.current?.files![0]) {
-            // console.log(avatarRef.current?.files![0]);
             const file = avatarRef.current.files[0];
             setOpen(true);
             setFileInfo(file)
             const url = URL.createObjectURL(file)
             setImage(url);
-            // avatarRef.current.value = '';
         }
     }
     const onCrop = () => {
@@ -111,10 +109,10 @@ export default function CreateToken() {
             return;
         }
         setSpinner(true);
-        const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+        const connection = new Connection(clusterApiUrl(net === "devnet" ? "devnet" : "mainnet-beta"), "confirmed");
         const mint = Keypair.generate();
 
-        const image = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, 'token-asset');
+        const image = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, net === "devnet" ? "token-asset-devnet" : 'token-asset');
         if (!image) return;
         const extensions : {[key: string]: string} | undefined = (!telegram && !discord && !website && !twitter) ? undefined : {};
         if (extensions) {
@@ -135,7 +133,7 @@ export default function CreateToken() {
         const blob = new Blob([bytes], {
             type: "application/json;charset=utf-8"
         });
-        const metaFile = await uploadFile(new File([blob], 'metadata.json', { type: "application/json;charset=utf-8" }), 'metadata.json', "application/json;charset=utf-8", 'token-asset')
+        const metaFile = await uploadFile(new File([blob], 'metadata.json', { type: "application/json;charset=utf-8" }), 'metadata.json', "application/json;charset=utf-8", net === "devnet" ? "token-asset-devnet" : 'token-asset')
         if (!metaFile) return;
         const metadata: TokenMetadata = {
             mint: mint.publicKey,
@@ -226,9 +224,14 @@ export default function CreateToken() {
                 await connection.confirmTransaction(signature);
                 console.log(`Transaction confirmed with signature: ${signature}`);
             }
-            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal);
+            saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal, net === "devnet");
             download(mint);
-            toast.success(<p>Token mint success! Please check your wallet or <a target="_blank" href={`https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet`}>here</a>.</p>)
+            toast.success(
+                <p>
+                    <span>Token mint success! Please check your wallet or </span>
+                    <a target="_blank" className="underline text-[#00a6f4]" href={`https://explorer.solana.com/address/${mint.publicKey.toBase58()}${net === "devnet" ? "?cluster=devnet" : ""}`}>click here</a>.
+                </p>
+            )
             router.push("/tokens", {scroll: true})
         } catch (e) {
             console.log("Error:", e);

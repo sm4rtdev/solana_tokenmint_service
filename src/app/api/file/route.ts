@@ -20,7 +20,6 @@ export async function POST(
                 "Content-Disposition": "inline"
             }
         })
-    console.log("data", onlineFile, error);
     const { data: url } = supabase.storage.from("sol-token-mint").getPublicUrl(`${onlineFile?.path}`);
     return new Response(JSON.stringify({
         url: url?.publicUrl
