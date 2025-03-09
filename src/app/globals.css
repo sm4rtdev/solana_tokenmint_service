@@ -91,6 +91,6 @@ body {
   --tw-ring-offset-color: hsl(233.57deg 100% 73.35%);
 }
 
-input, img {
+input, textarea, img {
   border-color: rgba(175, 175, 175, 0.363) !important;
 }

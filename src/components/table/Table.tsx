@@ -52,16 +52,16 @@ const MyTable = ({
         setMaxPage(Math.ceil(total/size));
     }, [total])
     return (
-        <>
+        <div className="flex flex-col gap-4">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="border-[#fff6] border-double !border-b-[3px]">
                 {header.map((item, index) => (<TableHead key={index} className="text-center">{item.value}</TableHead>))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {body.map((row, index) => (
-              <TableRow key={index}>
+              <TableRow key={index} className="hover:bg-[#fff2] border-[#fff3]">
                 {header.map((cell, index) => (<TableCell key={index} className="mx-auto text-center">{row[cell.key].value}</TableCell>))}
               </TableRow>
             ))}
@@ -112,7 +112,7 @@ const MyTable = ({
             </PaginationItem>
           </PaginationContent>
         </Pagination>
-        </>
+        </div>
     )
 }
 
