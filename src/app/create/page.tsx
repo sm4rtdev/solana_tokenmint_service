@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button"
 import { clusterApiUrl, Connection, Keypair, SystemProgram, TransactionMessage, VersionedTransaction } from "@solana/web3.js"
-import { createAssociatedTokenAccountInstruction, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, createMintToCheckedInstruction, ExtensionType, getAssociatedTokenAddressSync, getMintLen, LENGTH_SIZE, TOKEN_2022_PROGRAM_ID, TYPE_SIZE } from "@solana/spl-token"
+import { AuthorityType, createAssociatedTokenAccountInstruction, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, createMintToCheckedInstruction, createSetAuthorityInstruction, ExtensionType, getAssociatedTokenAddressSync, getMintLen, LENGTH_SIZE, TOKEN_2022_PROGRAM_ID, TYPE_SIZE } from "@solana/spl-token"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify";
 import { Label } from "@/components/ui/label"
@@ -14,10 +14,13 @@ import { removeFile, saveToken, uploadFile } from "@/utils/api"
 import { createInitializeInstruction, pack, TokenMetadata } from "@solana/spl-token-metadata"
 import { Loader2 } from "lucide-react"
 import { useGlobalContext } from "@/context/global-context"
+import { Textarea } from "@/components/ui/textarea"
+import { useRouter } from "next/navigation"
 
 
 export default function CreateToken() {
     const { user } = useGlobalContext();
+    const router = useRouter();
     const avatarRef = useRef<HTMLInputElement>(null);
     const [imgFile, setImgFile] = useState<File>();
     const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
@@ -31,6 +34,14 @@ export default function CreateToken() {
     const [supply, setSupply] = useState<number>(1_000_000);
     const [open, setOpen] = useState(false);
     const [spinner, setSpinner] = useState(false);
+    const [creator, setCreator] = useState({
+        name: "Sixcool",
+        site: process.env.NEXT_PUBLIC_ORIGIN || "https://mint-solana-token.vercel.app"
+    })
+    const [telegram, setTelegram] = useState("");
+    const [discord, setDiscord] = useState("");
+    const [website, setWebsite] = useState("");
+    const [twitter, setTwitter] = useState("");
 
     const download = (mint: Keypair) => {
         const url = URL.createObjectURL(new Blob([`[${mint.secretKey.toString()}]`]))
@@ -75,6 +86,9 @@ export default function CreateToken() {
     }
 
     const createToken = async () => {
+        if (!user) {
+            router.push('/auth/signin?redirect=/create', {scroll: true})
+        }
         if (!name) {
             toast.warn("Input the token name!");
             return;
@@ -97,16 +111,25 @@ export default function CreateToken() {
             return;
         }
         setSpinner(true);
-        const connection = new Connection(clusterApiUrl("devnet"));
+        const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
         const mint = Keypair.generate();
 
         const image = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, 'token-asset');
         if (!image) return;
+        const extensions : {[key: string]: string} | undefined = (!telegram && !discord && !website && !twitter) ? undefined : {};
+        if (extensions) {
+            if (telegram) extensions.telegram = telegram;
+            if (discord) extensions.discord = discord;
+            if (twitter) extensions.twitter = twitter;
+            if (website) extensions.website = website;
+        }
         const str = JSON.stringify({
             name,
             symbol,
             description,
-            image
+            image,
+            creator,
+            extensions
         }, null, 4);
         const bytes = new TextEncoder().encode(str);
         const blob = new Blob([bytes], {
@@ -169,6 +192,14 @@ export default function CreateToken() {
                 decimal,
                 [],
                 programId
+            ),
+            createSetAuthorityInstruction(
+                mint.publicKey,
+                payer,
+                AuthorityType.MintTokens,
+                null,
+                [],
+                programId
             )
         ]
         try {
@@ -198,6 +229,7 @@ export default function CreateToken() {
             saveToken(mint.publicKey.toBase58(), name, symbol, description, image, supply, decimal);
             download(mint);
             toast.success(<p>Token mint success! Please check your wallet or <a target="_blank" href={`https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet`}>here</a>.</p>)
+            router.push("/tokens", {scroll: true})
         } catch (e) {
             console.log("Error:", e);
             removeFile(image);
@@ -209,12 +241,12 @@ export default function CreateToken() {
 
     useEffect(() => {
         if (!user) {
-            location.href = '/auth/signin?redirect=/create';
+            router.push('/auth/signin?redirect=/create', {scroll: true})
         }
     }, [])
 
     return (
-        <div className="flex flex-col gap-4 py-16 md:w-[42rem] mx-auto">
+        <div className="flex flex-col gap-4 py-8 md:w-[42rem] mx-auto">
             <div className="w-full flex gap-8 justify-between">
                 <div className="w-3/5 flex flex-col items-center gap-2">
                     <div className="w-full">
@@ -245,7 +277,25 @@ export default function CreateToken() {
             </div>
             <div className="w-full">
                 <Label>Token description*</Label>
-                <Input placeholder="Token description" className="bg-[#090909]" value={description} onChange={e => setDescription(e.target.value)} />
+                <Textarea placeholder="Token description" className="bg-[#090909]" value={description} onChange={e => setDescription(e.target.value)} />
+            </div>
+            <div className="w-full grid grid-cols-2 gap-3">
+                <div className="w-full">
+                    <Label>Telegram (Optional)</Label>
+                    <Input placeholder="https://t.me/" className="bg-[#090909]" value={telegram} onChange={e => setTelegram(e.target.value)} />
+                </div>
+                <div className="w-full">
+                    <Label>Discord (Optional)</Label>
+                    <Input placeholder="https://discord.gg/" className="bg-[#090909]" value={discord} onChange={e => setDiscord(e.target.value)} />
+                </div>
+                <div className="w-full">
+                    <Label>Twitter (Optional)</Label>
+                    <Input placeholder="https://x.com/" className="bg-[#090909]" value={twitter} onChange={e => setTwitter(e.target.value)} />
+                </div>
+                <div className="w-full">
+                    <Label>Website (Optional)</Label>
+                    <Input placeholder="https://" className="bg-[#090909]" value={website} onChange={e => setWebsite(e.target.value)} />
+                </div>
             </div>
             <div className="w-full flex justify-end mt-4">
                 <Button onClick={createToken} disabled={spinner} className="w-2/5 hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]">
