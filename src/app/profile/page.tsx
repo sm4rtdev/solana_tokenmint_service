@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CropperRef, Cropper } from 'react-advanced-cropper';
 import 'react-advanced-cropper/dist/style.css'
-import { updateUser, uploadFile } from "@/utils/api"
+import { removeFile, updateUser, uploadFile } from "@/utils/api"
 import { useGlobalContext } from "@/context/global-context";
+import { useRouter } from "next/navigation";
 const Profile = () => {
     const avatarRef = useRef<HTMLInputElement>(null);
+    const router = useRouter();
     const { user, setUser } = useGlobalContext();
     const [imgFile, setImgFile] = useState<File>();
     const [fileInfo, setFileInfo] = useState<{ name: string, type: string }>();
@@ -26,7 +28,6 @@ const Profile = () => {
 
     const onChooseImage = () => {
         if (avatarRef.current?.files![0]) {
-            // console.log(avatarRef.current?.files![0]);
             const file = avatarRef.current.files[0];
             setOpen(true);
             setFileInfo(file)
@@ -41,8 +42,8 @@ const Profile = () => {
             const canvas = cropperRef.current.getCanvas({ width: 128, height: 128 });
             if (canvas) {
                 canvas.toBlob(blob => {
-                    blob && setImgFile(new File([blob], fileInfo?.name!, { type: 'image/png' }));
-                }, 'image/png');
+                    blob && setImgFile(new File([blob], fileInfo?.name!, { type: fileInfo?.type }));
+                }, fileInfo?.type);
                 setPreview(canvas.toDataURL());
             }
         }
@@ -54,20 +55,23 @@ const Profile = () => {
     }
 
     const SaveProfile = async () => {
+        if (!user) {
+            router.push("/auth/signin?redirect=/profile", {scroll: true});
+        }
         if (!name) {
             toast.warn("Input the your name!");
             return;
         }
-        if (!preview || !imgFile) {
-            toast.warn("Choose the your avatar!");
-            return;
+        let avatar = null;
+        if (imgFile) {
+            avatar = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, 'avatar');
+            removeFile(user!.avatar);
         }
 
-        const avatar = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, 'avatar');
         try {
-            const res = await updateUser(name, avatar);
+            const res = await updateUser(name, avatar || preview);
             if (res) {
-                setUser({email: user? user.email: "", name, avatar})
+                setUser({email: user? user.email: "", name, avatar: avatar || preview})
                 toast.success("Profile updated successfully!");
             }
         }
@@ -79,26 +83,27 @@ const Profile = () => {
     }
 
     return (
-        <div className="flex flex-col gap-8 px-16 py-16 w-[50rem] mx-auto">
+        <div className="flex flex-col gap-8 px-8 pt-16 mx-auto">
             <div className="w-full flex flex-col gap-8 justify-center items-center">
                 <div className="w-full flex justify-center relative mb-60">
-                    <Input type="file" ref={avatarRef} accept="image/png" onChange={onChooseImage} className="mt-4 border border-gray h-56 w-56 rounded-full object-contain absolute z-10 opacity-0" />
-                    {preview ? <img
+                    <Input type="file" ref={avatarRef} accept="image/*" onChange={onChooseImage} className="cursor-pointer mt-4 border border-gray h-56 w-56 rounded-full object-contain absolute z-10 opacity-0" />
+                    <div className="mt-4 border border-[#afafaf5c] bg-[#090909] h-56 aspect-[1/1] rounded-full absolute"></div>
+                    {preview && <img
                         src={preview}
                         className="mt-4 border h-56 aspect-[1/1] rounded-full object-contain absolute"
-                    /> : <div className="mt-4 border border-[#afafaf5c] bg-[#090909] h-56 aspect-[1/1] rounded-full absolute"></div>}
+                    />}
                 </div>
-                <div className="w-2/5 flex flex-col items-center gap-4">
-                    <div className="w-full">
+                <div className="w-full flex flex-col items-center gap-4">
+                    <div className="w-56">
                         <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} className="bg-[#090909]"/>
                     </div>
                 </div>
             </div>
             <div className="w-full flex justify-center">
-                <Button onClick={SaveProfile} className="w-2/5 hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]">Save Profile</Button>
+                <Button onClick={SaveProfile} className="w-56 rounded-full bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]">Save Profile</Button>
             </div>
             <Dialog open={open} modal={true} >
-                <DialogContent>
+                <DialogContent className="bg-[#121212] border-[#fff4]">
                     <DialogHeader>
                         <DialogTitle>Crop Image</DialogTitle>
                         <DialogDescription></DialogDescription>
@@ -111,8 +116,8 @@ const Profile = () => {
                         }}
                     />
                     <DialogFooter>
-                        <Button onClick={onCrop}>Crop</Button>
-                        <Button onClick={onCancel}>Uncrop</Button>
+                        <Button className="bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]" onClick={onCrop}>Crop</Button>
+                        <Button className="bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]" onClick={onCancel}>Uncrop</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -91,7 +91,7 @@ const ChangePassword = () => {
 
     return (
         <div className="flex w-full justify-center pt-16">
-            <Card className="bg-[#090909] text-white border-0 py-6">
+            <Card className="bg-[#121212] text-white border-0 py-6">
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
                         <div className="space-y-2">
@@ -201,7 +201,7 @@ const ChangePassword = () => {
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]" disabled={isLoading}>
+                        <Button type="submit" className="w-full rounded-full bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
