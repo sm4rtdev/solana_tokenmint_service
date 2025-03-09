@@ -7,6 +7,7 @@ export async function GET(
   const url = new URL(req.url);
   const page = parseInt(url.searchParams.get("page") || "1");
   const size = parseInt(url.searchParams.get("size") || "10");
+  const net = url.searchParams.get("devnet");
   const token = req.headers.get("Authorization");
   if (!token) {
     return new Response(JSON.stringify({
@@ -17,7 +18,7 @@ export async function GET(
   const { email:user } = validate_token(token.substring(7));
   if (user) {
     const supabase = await createClient();
-    const tokens = (await supabase.from("tokens").select("name, created_at, url, address, symbol, description, decimals, supply").eq("user", user).order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;
+    const tokens = (await supabase.from("tokens" + (net !== null ? "_devnet" : "")).select("name, created_at, url, address, symbol, description, decimals, supply").eq("user", user).order("created_at", { ascending: false}).range(page * size - size, page * size - 1)).data;
     return new Response(JSON.stringify(tokens))
   } else {
     return new Response(JSON.stringify({

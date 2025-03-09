@@ -97,14 +97,14 @@ export const removeFile = async (link: string): Promise<boolean> => {
     return res.data.ok;
 }
 
-export const getTokenList = async (page: number = 1, size: number = 10, email?: string) : Promise<any[] | null> => {
-    const res = await axios.get(`/api/tokens?page=${page}&size=${size}${email?"&user=" + email:""}`)
+export const getTokenList = async (page: number = 1, size: number = 10, email?: string, devnet: boolean = false) : Promise<any[] | null> => {
+    const res = await axios.get(`/api/tokens?page=${page}&size=${size}${email?"&user=" + email:""}${devnet?"&devnet":""}`)
     return res.data;
 }
 
-export const getMyTokens = async (page: number = 1, size: number = 10) : Promise<any[] | null> => {
+export const getMyTokens = async (page: number = 1, size: number = 10, devnet: boolean = false) : Promise<any[] | null> => {
     try {
-        const res = await axios.get(`/api/tokens/my-tokens?page=${page}&size=${size}`, {
+        const res = await axios.get(`/api/tokens/my-tokens?page=${page}&size=${size}${devnet?"&devnet":""}`, {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("token")
             }
@@ -116,8 +116,8 @@ export const getMyTokens = async (page: number = 1, size: number = 10) : Promise
     }
 }
 
-export const saveToken = async (address: string, name: string, symbol: string, description: string, url: string, supply: number, decimals: number) : Promise<boolean> => {
-    const res = await axios.post(`/api/tokens`, {
+export const saveToken = async (address: string, name: string, symbol: string, description: string, url: string, supply: number, decimals: number, devnet: boolean = false) : Promise<boolean> => {
+    const res = await axios.post(`/api/tokens${devnet ? "?devnet": ""}`, {
         address,
         name,
         symbol,

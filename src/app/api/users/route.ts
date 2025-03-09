@@ -9,7 +9,6 @@ export async function GET(
   const size = parseInt(url.searchParams.get("size") || "10");
   const supabase = await createClient();
   const email = url.searchParams.get("email");
-  console.log(email);
   if (email) {
     const { data: users } = await supabase.from("users").select().eq(`email`, email);
     return new Response(JSON.stringify(users![0]))
@@ -29,7 +28,6 @@ export async function PUT(
   req: Request
 ) {
   const token = req.headers.get('Authorization');
-  console.log(token);
   if (!token || !token.startsWith("Bearer ")) {
     return new Response(JSON.stringify({
       message: "Wrong Credentials",
@@ -38,7 +36,6 @@ export async function PUT(
   }
   const { email } = validate_token(token.substring(7));
   const { name, avatar } = await req.json();
-  console.log(name, avatar);
   const supabase = await createClient();
   const { error } = await supabase.from("users").update({ name, avatar }).eq(`email`, email);
   return new Response(JSON.stringify({

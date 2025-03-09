@@ -1,18 +1,20 @@
 'use client'
 
 import MyTable from "@/components/table/Table";
+import { useGlobalContext } from "@/context/global-context";
 import { getMyTokens } from "@/utils/api";
 import { useEffect, useState } from "react";
 
 export default function MyTokens() {
+  const { net } = useGlobalContext();
   const [tokens, setTokens] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [total, setTotal] = useState(Math.ceil(1/size));
 
   useEffect(() => {
-    getMyTokens(page, size).then(tokens => tokens && setTokens(tokens));
-  }, [page, size]);
+    getMyTokens(page, size, net === "devnet").then(tokens => tokens && setTokens(tokens));
+  }, [page, size, net]);
   
   return (
     <div className="flex flex-col font-[family-name:var(--font-geist-sans)]">
@@ -46,7 +48,7 @@ export default function MyTokens() {
             value: token.name
           },
           address: {
-            value: <a target="_blank" href={`https://explorer.solana.com/address/${token.address}?cluster=devnet`}>{token.address.substring(0, 8) + "..." + token.address.substring(token.address.length - 8)}</a>
+            value: <a target="_blank" className="underline text-[#00a6f4]" href={`https://solscan.io/token/${token.address}${net === "devnet" ? "?cluster=devnet" : ""}`}>{token.address.substring(0, 8) + "..." + token.address.substring(token.address.length - 8)}</a>
           },
           symbol: {
             value: token.symbol
