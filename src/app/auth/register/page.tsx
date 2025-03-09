@@ -113,7 +113,7 @@ const Register = () => {
 
     return (
         <div className="flex w-full justify-center pt-16">
-            <Card className="bg-[#090909] text-white border-0 py-6">
+            <Card className="bg-[#121212] text-white border-0 py-6">
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4 pt-6">
                         <div className="space-y-2">

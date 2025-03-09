@@ -7,14 +7,14 @@ export async function POST(
 ) {
     const formdata = await req.formData();
     const folder = formdata.get("path") || "avatar";
-    const filename = formdata.get("filename") || ".png";
+    const filename = formdata.get("filename") || "image.png";
     const type = formdata.get("type") || "image/png";
     const file = formdata.get('file')!;
     
     const supabase = await createClient();
     const {data: onlineFile, error} = await supabase.storage
         .from("sol-token-mint")
-        .upload(`${folder}/${uuid()}${filename}`, file, {
+        .upload(`${folder}/${uuid()}-${filename}`, file, {
             contentType: type as string,
             headers: {
                 "Content-Disposition": "inline"

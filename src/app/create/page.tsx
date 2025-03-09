@@ -247,7 +247,7 @@ export default function CreateToken() {
 
     return (
         <div className="flex flex-col gap-4 py-8 md:w-[42rem] mx-auto">
-            <div className="w-full flex gap-8 justify-between">
+            <div className="w-full flex gap-3 sm:gap-8 justify-between">
                 <div className="w-3/5 flex flex-col items-center gap-2">
                     <div className="w-full">
                         <Label>Token name*</Label>
@@ -269,10 +269,11 @@ export default function CreateToken() {
                 <div className="w-2/5 relative">
                     <Label>Token avatar*</Label>
                     <Input type="file" ref={avatarRef} accept="image/png"  onChange={onChooseImage} className="cursor-pointer border border-gray rounded-md h-64 w-full object-contain absolute z-10 opacity-0" />
-                    {preview ? <img
+                    <div className="border border-[#afafaf5c] bg-[#090909] rounded-md h-64 w-full absolute"></div>
+                    {preview && <img
                         src={preview}
                         className="border rounded-md h-64 w-full object-contain absolute"
-                    /> : <div className="border border-[#afafaf5c] bg-[#090909] rounded-md h-64 w-full absolute"></div>}
+                    />}
                 </div>
             </div>
             <div className="w-full">
@@ -298,7 +299,7 @@ export default function CreateToken() {
                 </div>
             </div>
             <div className="w-full flex justify-end mt-4">
-                <Button onClick={createToken} disabled={spinner} className="w-2/5 hover:to-[#ba4bff] hover:from-[#ba4bff] rounded-full bg-gradient-to-r to-[#351166] from-[#b55ced]">
+                <Button onClick={createToken} disabled={spinner} className="w-2/5 rounded-full bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]">
                     {spinner ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -311,7 +312,7 @@ export default function CreateToken() {
             </div>
 
             <Dialog open={open} modal={true}>
-                <DialogContent>
+                <DialogContent className="bg-[#121212] border-[#fff4]">
                     <DialogHeader>
                         <DialogTitle>Crop Image</DialogTitle>
                         <DialogDescription></DialogDescription>
@@ -324,8 +325,8 @@ export default function CreateToken() {
                         }}
                     />
                     <DialogFooter>
-                        <Button onClick={onCrop}>Crop</Button>
-                        <Button onClick={onCancel}>Uncrop</Button>
+                        <Button className="bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]" onClick={onCrop}>Crop</Button>
+                        <Button className="bg-gradient-to-b to-[#301060] from-[#9434d3] hover:to-[#4f2b84] hover:from-[#6e20a3]" onClick={onCancel}>Uncrop</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
