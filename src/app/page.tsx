@@ -2,19 +2,27 @@
 
 import MyTable from "@/components/table/Table";
 import { useGlobalContext } from "@/context/global-context";
-import { getTokenList } from "@/utils/api";
+import { getTokenList, getTokenTotalNumber } from "@/utils/api";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 export default function Home() {
   const { net } = useGlobalContext();
   const [tokens, setTokens] = useState<any[]>([]);
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(10);
-  const [total, setTotal] = useState(Math.ceil(1/size));
+  const [size, setSize] = useState(5);
+  const [total, setTotal] = useState(0);
+  const params = useParams();
 
   useEffect(() => {
     getTokenList(page, size, undefined, net === "devnet").then(tokens => tokens && setTokens(tokens));
+    getTokenTotalNumber(undefined, net === "devnet").then(number => setTotal(number));
   }, [page, size, net]);
+
+  useEffect(() => {
+    setPage(Number(params.page) || 1);
+    setSize(Number(params.size) || 5);
+  },[page, params.page, size, params.size])
   
   return (
     <div className="flex flex-col font-[family-name:var(--font-geist-sans)]">

@@ -32,15 +32,17 @@ const MyTable = ({
     body: BodyRow[],
     total: number
   }) => {
-    const [maxPage, setMaxPage] = useState(0);
+    const [maxPage, setMaxPage] = useState(Math.ceil(total/size));
 
     const onPrev = () => {
     if (page > 1) {
+      console.log('Previous page ============>', page);
         setPage(prev => prev - 1);
     }
     }
-    const onNext = () => {
-        if (page < maxPage) {
+    const onNext = () => {      
+        if (page <= maxPage) {
+          console.log('Next page ============>', page);
             setPage(prev => prev + 1);
         }
     }
