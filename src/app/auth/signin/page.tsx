@@ -161,16 +161,6 @@ const SignIn = ({ searchParams }: { searchParams: { [key: string]: string } }) =
                             {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                         </div>
 
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="remember-me"
-                                checked={formData.rememberMe}
-                                onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
-                            />
-                            <Label htmlFor="remember-me" className="text-sm font-normal cursor-pointer">
-                                Remember me
-                            </Label>
-                        </div>
                     </CardContent>
 
                     <CardFooter className="flex flex-col space-y-4">

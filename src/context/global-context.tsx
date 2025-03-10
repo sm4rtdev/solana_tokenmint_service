@@ -12,22 +12,22 @@ type User = {
 type GlobalContextType = {
     user: User | null,
     setUser: Dispatch<SetStateAction<User | null>>,
-    net: "mainnet" | "devnet",
-    setNet: Dispatch<SetStateAction<"mainnet" | "devnet">>
+    net: "mainnet" | "devnet" | null,
+    setNet: Dispatch<SetStateAction<"mainnet" | "devnet" | null>>
 }
 
 // Create the context with default values
 const GlobalContext = createContext<GlobalContextType>({
     user: null,
     setUser: () => {},
-    net: "mainnet",
+    net: null,
     setNet: () => {}
 })
 
 // Create a provider component
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [net, setNet] = useState<"mainnet" | "devnet">("mainnet");
+    const [net, setNet] = useState<"mainnet" | "devnet" | null>(null);
     useEffect(() => {
         validate_token().then(data => setUser(data))
         const net = localStorage.getItem("net") === "devnet" ? "devnet" : "mainnet";

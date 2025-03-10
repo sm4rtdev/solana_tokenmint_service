@@ -2,19 +2,37 @@
 
 import MyTable from "@/components/table/Table";
 import { useGlobalContext } from "@/context/global-context";
-import { getTokenList } from "@/utils/api";
+import { getTokenList, getTokenTotalNumber } from "@/utils/api";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function Home() {
   const { net } = useGlobalContext();
   const [tokens, setTokens] = useState<any[]>([]);
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(10);
-  const [total, setTotal] = useState(Math.ceil(1/size));
+  const [size, setSize] = useState(5);
+  const [total, setTotal] = useState(0);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    getTokenList(page, size, undefined, net === "devnet").then(tokens => tokens && setTokens(tokens));
-  }, [page, size, net]);
+    fetchData();
+  }, [net]);
+
+  const fetchData = (p = page, s = size) => {
+    if (p > 0 && s > 0 && net) {
+      getTokenList(p, s, undefined, net === "devnet").then(tokens => tokens && setTokens(tokens));
+      getTokenTotalNumber(undefined, net === "devnet").then(number => setTotal(number));
+    }
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    const page = Number(params.get('page') || 1);
+    const size = Number(params.get('size') || 5);
+    setPage(page)
+    setSize(size)
+    fetchData(page, size);
+  },[searchParams])
   
   return (
     <div className="flex flex-col font-[family-name:var(--font-geist-sans)]">

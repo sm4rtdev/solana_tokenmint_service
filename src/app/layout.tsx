@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify"
 import "./globals.css";
 import Navbar from "@/components/navbar/navbar";
 import { GlobalContextProvider } from "@/context/global-context";
+import { Suspense } from "react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,9 +34,11 @@ export default function RootLayout({
       >
         <div className="py-8 px-4 gap-4 container mx-auto">
           <GlobalContextProvider>
-            <ToastContainer theme="dark" />
-            <Navbar />
-            {children}
+            <Suspense>
+              <ToastContainer theme="dark" />
+              <Navbar />
+              {children}
+            </Suspense>
           </GlobalContextProvider>
         </div>
       </body>
