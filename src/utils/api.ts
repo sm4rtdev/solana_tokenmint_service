@@ -103,7 +103,7 @@ export const getTokenList = async (page: number = 1, size: number = 10, email?: 
 }
 
 export const getTokenTotalNumber = async (email?: string, devnet: boolean = false): Promise<number> => {
-    const res = await axios.get(`/api/tokens/total-number?${email ? "&user=" + email : ""}${devnet ? "&devnet" : ""}`)
+    const res = await axios.get(`/api/tokens/total-number${email ? "?user=" + email : ""}${devnet ? email ? "&devnet" : "?devnet" : ""}`)
     return res.data;
 }
 
@@ -123,7 +123,7 @@ export const getMyTokens = async (page: number = 1, size: number = 10, devnet: b
 
 export const getMyTokensTotalNumber = async (devnet: boolean = false): Promise<any[] | null> => {
     try {
-        const res = await axios.get(`/api/tokens/my-tokens/number?${devnet ? "&devnet" : ""}`, {
+        const res = await axios.get(`/api/tokens/my-tokens/total-number${devnet ? "?devnet" : ""}`, {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("token")
             }

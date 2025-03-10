@@ -2,10 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import { validate_token } from "@/utils/jwt";
 
 export async function GET(req: Request) {
-    const supabase = await createClient();
     const url = new URL(req.url);
     const net = url.searchParams.get("devnet");
-    const email = url.searchParams.get("email");
     const token = req.headers.get("Authorization");
     if (!token) {
         return new Response(JSON.stringify({
