@@ -109,7 +109,6 @@ export default function CreateToken() {
             return;
         }
         setSpinner(true);
-        const connection = new Connection(clusterApiUrl(net === "devnet" ? "devnet" : "mainnet-beta"), "confirmed");
         const mint = Keypair.generate();
 
         const image = await uploadFile(imgFile, fileInfo?.name!, fileInfo?.type, net === "devnet" ? "token-asset-devnet" : 'token-asset');
@@ -147,61 +146,77 @@ export default function CreateToken() {
         ]);
         const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
 
-        const lamports = await connection.getMinimumBalanceForRentExemption(mintLen + metadataLen);
-
-        const programId = TOKEN_2022_PROGRAM_ID;
-
-        const ata = getAssociatedTokenAddressSync(mint.publicKey, payer, false, programId);
-
-        const instructions_create = [
-            SystemProgram.createAccount({
-                fromPubkey: payer,
-                newAccountPubkey: mint.publicKey,
-                space: mintLen,
-                lamports,
-                programId
-            }),
-            createInitializeMetadataPointerInstruction(mint.publicKey, payer, mint.publicKey, programId),
-            createInitializeMintInstruction(mint.publicKey, decimal, payer, null, programId),
-            createInitializeInstruction({
-                programId,
-                mint: mint.publicKey,
-                metadata: mint.publicKey,
-                name,
-                symbol,
-                uri: metaFile,
-                mintAuthority: payer,
-                updateAuthority: payer
-            })
+        const mainnet_rpcs = [
+            "https://api.mainnet-beta.solana.com",
+            "https://solana.drpc.org",
+            "https://go.getblock.io/4136d34f90a6488b84214ae26f0ed5f4",
+            "https://solana-rpc.publicnode.com",
+            "https://api.blockeden.xyz/solana/67nCBdZQSH9z3YqDDjdm",
+            "https://solana.leorpc.com/?api_key=FREE",
+            "https://endpoints.omniatech.io/v1/sol/mainnet/public",
+            "https://solana.api.onfinality.io/public"
         ]
-        const instructions_mint = [
-            createAssociatedTokenAccountInstruction(
-                payer,
-                ata,
-                payer,
-                mint.publicKey,
-                programId
-            ),
-            createMintToCheckedInstruction(
-                mint.publicKey,
-                ata,
-                payer,
-                supply * 10 ** decimal,
-                decimal,
-                [],
-                programId
-            ),
-            createSetAuthorityInstruction(
-                mint.publicKey,
-                payer,
-                AuthorityType.MintTokens,
-                null,
-                [],
-                programId
-            )
-        ]
+
         try {
+            const connection = new Connection(net === "devnet" ? "https://api.devnet.solana.com" : "https://mainnet.helius-rpc.com/?api-key=488f3679-3ae7-4e8f-baa9-60dc45f0a75c", "confirmed");
+
+            const lamports = await connection.getMinimumBalanceForRentExemption(mintLen + metadataLen);
+            console.log("calculate lamport", lamports)
+            const programId = TOKEN_2022_PROGRAM_ID;
+
+            const ata = getAssociatedTokenAddressSync(mint.publicKey, payer, false, programId);
+            console.log("ata", ata)
+
+            const instructions_create = [
+                SystemProgram.createAccount({
+                    fromPubkey: payer,
+                    newAccountPubkey: mint.publicKey,
+                    space: mintLen,
+                    lamports,
+                    programId
+                }),
+                createInitializeMetadataPointerInstruction(mint.publicKey, payer, mint.publicKey, programId),
+                createInitializeMintInstruction(mint.publicKey, decimal, payer, null, programId),
+                createInitializeInstruction({
+                    programId,
+                    mint: mint.publicKey,
+                    metadata: mint.publicKey,
+                    name,
+                    symbol,
+                    uri: metaFile,
+                    mintAuthority: payer,
+                    updateAuthority: payer
+                })
+            ]
+            const instructions_mint = [
+                createAssociatedTokenAccountInstruction(
+                    payer,
+                    ata,
+                    payer,
+                    mint.publicKey,
+                    programId
+                ),
+                createMintToCheckedInstruction(
+                    mint.publicKey,
+                    ata,
+                    payer,
+                    supply * 10 ** decimal,
+                    decimal,
+                    [],
+                    programId
+                ),
+                createSetAuthorityInstruction(
+                    mint.publicKey,
+                    payer,
+                    AuthorityType.MintTokens,
+                    null,
+                    [],
+                    programId
+                )
+            ]
+            console.log("create instructions")
             const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+            console.log("recent blockhash", recentBlockhash)
             const transactionV0_create = new VersionedTransaction(
                 new TransactionMessage({
                     payerKey: payer,
@@ -219,6 +234,7 @@ export default function CreateToken() {
             );
             const provider = getSolanaProvider();
             const signedTransactions = await provider.signAllTransactions([transactionV0_create, transactionV0_mint])
+            console.log("singed transaction", signedTransactions)
             for (const signedTransaction of signedTransactions) {
                 const signature = await connection.sendTransaction(signedTransaction);
                 await connection.confirmTransaction(signature);
