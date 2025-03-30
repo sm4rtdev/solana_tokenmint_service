@@ -2,7 +2,7 @@
 
 ## Deployment
 
-This platform is live on [https://mint-solana-token.vercel.app/](https://mint-solana-token.vercel.app/).
+This platform is live on [https://solana-tokenmint-service.vercel.app/](https://solana-tokenmint-service.vercel.app/).
 
 ![](public/dashboard.png)
 ![](public/create.png)
